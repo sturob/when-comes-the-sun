@@ -1,0 +1,466 @@
+<html> 
+  <head> 
+    <title>When Comes the Sun</title> 
+
+    <meta name="format-detection" content="event=no" >
+
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js">    
+    </script>
+
+    <script type="text/javascript">
+      
+      Date.prototype.getDayOfTheYear = function() {
+        var onejan = new Date(this.getFullYear(),0,1);
+        return Math.ceil((this - onejan) / 86400000);
+      }
+      
+      Date.prototype.getMinuteOfTheDay = function() {
+        return this.getHours() * 60 + this.getMinutes()
+      }
+      
+      
+      
+      // -- *D ---
+      //
+      // These trigonometry functions use degrees instead of radians.
+      //
+      function sinD(n)  { return Math.sin (n * 0.0174532925199433); }
+      function cosD(n)  { return Math.cos (n * 0.0174532925199433); }
+      function tanD(n)  { return Math.tan (n * 0.0174532925199433); }
+      function asinD(n) { return Math.asin(n) * 57.2957795130823;   }
+      function acosD(n) { return Math.acos(n) * 57.2957795130823;   }
+      function atanD(n) { return Math.atan(n) * 57.2957795130823;   }
+
+
+      function Int(n) { return n < 0 ? Math.ceil(n) : Math.floor(n); }
+      function Sign(n) { if (n < 0) return -1; if (n > 0) return 1; return 0; }
+
+
+      // -- isNull --
+      //
+      // Determines whether an object is null.
+      //
+      function isNull(anObject)
+      {
+          return typeof anObject == "object" && !anObject;
+      }
+
+
+      // --- CalculateSunriseOrSunset ---
+      //
+      // Calculates the time of sunrise or sunset at a given location on a given day.
+      //
+      // Parameters
+      //    latitude - latitude in degrees of location
+      //   longitude - longitude in degrees of location
+      //        date - Date object representing day to calculate
+      //     sunrise - Boolean value indicating whether to calculate sunrise (true) or sunset (false)
+      //    twilight - Boolean value indicating whether to calculate twilight (true) or sunrise/sunset (false)
+      //
+      // Returns
+      //   floating-point hour of sun event in UTC (e.g., 5.15 => 0509Z), or null if the event doesn't occur on the given day
+      //
+      function CalculateSunriseOrSunset(latitude, longitude, date, sunrise, twilight)
+      {
+          // Source:
+          //   Almanac for Computers, 1990
+          //   published by Nautical Almanac Office
+          //   United States Naval Observatory
+          //   Washington, DC 20392
+
+          day   = date.getDate();
+          month = date.getMonth() + 1;
+          year  = date.getFullYear();
+
+          var zenith;
+
+          if (twilight)
+          {
+              // twilightSelect = document.getElementById('twilight');
+              // zenith = twilightSelect.value;
+
+              // <option id="civilOption" value="96" selected></option>
+              // <option id="nauticalOption" value="102"></option>
+              // <option id="astronomicalOption" value="108"></option>
+              zenith = 99;
+          }
+          else
+              zenith = 90.8333333333;
+
+
+          // Calculate the day of the year.
+
+          N1 = Math.floor(275.0 * month / 9.0);
+          N2 = Math.floor((month + 9.0) / 12.0);
+          N3 = 1.0 + Math.floor((year - 4.0 * Math.floor(year / 4.0) + 2.0) / 3.0);
+          N = N1 - (N2 * N3) + day - 30.0;
+
+
+          // Convert the longitude to hour value and calculate an approximate time.
+
+          lngHour = longitude / 15.0;
+
+          if (sunrise)
+              t = N + ((6.0 - lngHour) / 24.0);
+          else
+              t = N + ((18.0 - lngHour) / 24.0)
+
+
+          // Calculate the sun's mean anomaly.
+
+          M = (0.9856 * t) - 3.289;
+
+
+          // Calculate the sun's true longitude.
+
+          L = M + (1.916 * sinD(M)) + (0.020 * sinD(2 * M)) + 282.634;
+
+          while (L >= 360) L -= 360.0;
+          while (L <  0)   L += 360.0;
+
+
+          // Caculate the sun's right ascension.
+
+          RA = atanD(0.91764 * tanD(L));
+
+          while (RA >= 360) RA -= 360.0;
+          while (RA <  0)   RA += 360.0;
+
+
+          // Right ascension value needs to be in the same quadrant as L.
+
+          Lquadrant = Math.floor(L / 90.0) * 90.0;
+          RAquadrant = Math.floor(RA / 90.0) * 90.0;
+          RA = RA + (Lquadrant - RAquadrant);
+
+
+          // Right ascension value needs to be converted into hours.
+
+          RA /= 15.0;
+
+
+          // Calculate the sun's declination.
+
+          sinDec = 0.39782 * sinD(L);
+          cosDec = cosD(asinD(sinDec));
+
+
+          // Calculate the sun's local hour angle.
+
+          cosH = (cosD(zenith) - (sinDec * sinD(latitude))) / (cosDec * cosD(latitude));
+
+          if (sunrise)
+          {
+              if (cosH > 1) return null;
+          }
+          else
+          {
+              if (cosH < -1) return null;
+          }
+
+
+          // Finish calculating H and convert into hours.
+
+          if (sunrise)
+              H = 360.0 - acosD(cosH);
+          else
+              H = acosD(cosH);
+
+          H /= 15.0
+
+
+          // Calculate local mean time of rising.
+
+          T = H + RA - (0.06571 * t) - 6.622;
+
+
+          // Adjust back to UTC.
+
+          UT = T - lngHour;
+
+          while (UT >= 24) UT -= 24.0;
+          while (UT <  0)  UT += 24.0;
+
+
+          return UT;
+      }
+      
+      
+      
+      var X = 365,
+          Y = 240;
+          JAN_FIRST = new Date('2010/01/01'),
+          HOUR_IN_MS = 60 * 60 * 1000;
+          DAY_IN_MS = HOUR_IN_MS * 24,
+          current_day = JAN_FIRST.getTime(),
+          LONG = 51.32,
+          LAT = 0.5,
+          TODAY = new Date();
+
+      var DST_START = new Date("28 March 2010"),
+          DST_END = new Date("31 October 2010");
+        
+  
+      function do_onload () {
+        var example = document.getElementById('example');
+        var context = example.getContext('2d');
+        
+        for (var x=0; x < X; x++) {
+          var current_date = new Date(current_day);
+
+          var dawn = CalculateSunriseOrSunset(LONG, LAT, current_date, true, true);
+          var dusk = CalculateSunriseOrSunset(LONG, LAT, current_date, false, true);
+          
+          var sunrise = CalculateSunriseOrSunset(LONG, LAT, current_date, true);
+          var sunset = CalculateSunriseOrSunset(LONG, LAT, current_date, false);
+
+          if (current_date > DST_START && current_date < DST_END ) {
+            sunrise += 1;
+            sunset += 1;
+            dusk += 1;
+            dawn += 1;  
+          }
+          
+          for (var y=0; y < Y; y++) {
+            var shade = 0;
+            var now = y / 10;
+            var gap = sunrise - dawn;
+            
+            if (now > sunrise && now < sunset) {
+              shade = 255;
+            } else if (now > dawn && now < sunrise) {
+              var diff = sunrise - now;
+              shade = (255 - (diff * 255)) * gap;
+            } else if (now < dusk && now > sunset) {
+              var diff = now - sunset;
+              shade = (220 - (diff * 255)) * gap;
+              // shade = (sunrise - dawn) * 255;
+            }
+            
+            shade = Math.floor(shade);
+            
+            // if (is_today) { 
+              // shade = 160;
+            // }
+            
+            context.fillStyle = "rgb(" + (shade - 10) + ", " + (shade - 10)  + ", " + (shade + 40) + ")";
+            context.fillRect(x, y, 1, 1);
+          }
+          
+          current_day += DAY_IN_MS;
+        }
+        var shade = 160;
+        context.fillStyle = "rgba(255,128,0, 0.4)";
+        context.fillRect(TODAY.getDayOfTheYear(), 0, 1, 245);
+        
+        // context.fillStyle = "rgb(255, " + shade + ", " + shade + ")";
+        // context.fillRect(0, Math.floor(TODAY.getMinuteOfTheDay() / 6), 365, 0.5);
+        
+        context.fillStyle = "rgba(180,180,180,0.25)";
+        context.fillRect(0, 0, 365, 1);
+        context.fillRect(0, 60, 365, 1);
+        context.fillRect(0, 120, 365, 1);
+        context.fillRect(0, 180, 365, 1);  
+        context.fillRect(0, 240, 365, 1);       
+             
+
+        context.fillStyle = "rgba(255,255,0,1)";
+
+        context.fillRect(365, Math.floor(TODAY.getMinuteOfTheDay() / 6), 2, 1);
+
+
+        context.fillStyle = "rgba(0,0,0,0.5)";
+        context.fillRect(TODAY.getDayOfTheYear() - 2, Math.floor(TODAY.getMinuteOfTheDay() / 6) - 2, 5, 5);        
+        context.fillStyle = "rgb(255,255,0)";
+        context.fillRect(TODAY.getDayOfTheYear() - 1, Math.floor(TODAY.getMinuteOfTheDay() / 6) - 1, 3, 3);
+        
+        
+        var sunrise = CalculateSunriseOrSunset(LONG, LAT, TODAY, true);
+        var sunset = CalculateSunriseOrSunset(LONG, LAT, TODAY, false);
+        
+        if (TODAY > DST_START && TODAY < DST_END ) {
+          sunrise += 1;
+          sunset += 1;
+        }
+        
+        context.fillStyle = "rgba(130,130,100,1)";
+
+        context.fillRect(TODAY.getDayOfTheYear() - 2, Math.floor(sunrise * 10), 5, 1);
+        context.fillRect(TODAY.getDayOfTheYear() - 2, Math.floor(sunset * 10), 5, 1);
+        
+        context.fillStyle = "rgba(200,200,200,1)";
+        
+        context.fillRect(365, Math.floor(sunrise * 10), 12, 1);
+        context.fillRect(365, Math.floor(sunset * 10), 12, 1);
+        
+        $('#rise').css( { top: Math.floor(sunrise * 10) - 8 }).find('span').text(n_to_time(sunrise));
+        $('#set').css( { top: Math.floor(sunset * 10) - 8 }).find('span').text(n_to_time(sunset));
+
+        $('#months span#date').text(TODAY.getDate()).css({ left: TODAY.getMonth() * 30 + 2 });
+
+        $('#times span').text(time_to_hhmm(TODAY)).css({ top: (TODAY.getMinutes() + TODAY.getHours() * 60) / 6 - 2 });
+
+        $($('#months div').get(TODAY.getMonth())).addClass('ACTIVE');
+      }
+      
+      
+      function time_to_hhmm(t) {
+        var mins = t.getMinutes() + "";
+        if (mins.length == 1) { mins = "0" + mins; }
+        
+        return t.getHours() + ":" + mins;
+      }
+
+      function n_to_time (n) {
+        var tmp = new Date(HOUR_IN_MS * n);
+        var mins = tmp.getMinutes() + "";
+        if (mins.length == 1) { mins = "0" + mins; }
+        
+        return tmp.getHours() + ":" + mins;
+      }
+
+    </script> 
+
+    <style type="text/css"> 
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      
+      body {
+        font-family: Georgia;
+        background: #000028;
+        padding: 24px 48px;
+      }
+      
+      canvas {
+        background: #000028;
+      }
+      
+      #times {
+        position: absolute;
+        top: 32px;
+        left: 12px;
+        color: #555;
+/*        left: -6px;*/
+        font-size: 11px;
+        margin-top: -14px;
+      }
+      
+      #times div {
+        text-align: right;
+        height: 60px;
+      }
+      
+      #times span {
+        display: block;
+        text-align: right;
+        right: -296px;
+/*        text-shadow: 1px 1px 2px #000;*/
+        color: #ff0;
+        background: rgba(0,0,40, 0.8);
+/*        border: 1px solid #111;*/
+        padding: 1px 2px 2px 3px;
+/*        font-size: 15px;*/
+        position: absolute;
+      }
+      
+      #months {
+        position: absolute;
+        top: 264px;
+        color: #555;
+        width: 365px;
+        vertical-align: middle;
+        padding-left: 2px;
+/*        overflow: hidden;*/
+        height: 24px;
+/*        outline: 1px solid red;*/
+      }
+      #months div {
+/*        background: black;*/
+        height: 24px;
+        padding-top: 6px;
+        font-size: 11px;
+        width: 30px;
+        text-align: center;
+        float: left;
+        text-transform: uppercase;
+      }
+      
+      #months div.ACTIVE {
+        color: #ddd;
+      }
+      
+      #months span {
+        position: absolute;
+        top: 12px;
+/*        left: 280px; */
+        display: block;
+        width: 30px;
+        color: #eee;
+        text-align: center;
+/*        font-size: 11px;*/
+      }
+      
+      #sun {
+        font-size: 11px;
+        position: absolute;
+        top: 24px;
+        left: 420px;
+        color: #888;
+        text-transform: uppercase;
+      }
+      
+      #sun div {
+        width: 80px;
+        position: absolute;
+      }
+      
+      #sun span {
+        margin: 0 4px;
+        color: #eee;
+      }
+    </style> 
+  </head> 
+   
+  <body onload="do_onload();"> 
+    <canvas id="example" width="370" height="260">
+      This text is displayed if your browser does not support HTML5 Canvas.
+    </canvas>
+    
+    <div id="sun">
+      <div id="rise">
+        <span id='sunrise'></span> &uarr;
+      </div>
+      <div id="set">
+        <span id="sunset"></span> &darr;
+      </div>
+    </div>
+    
+    <div id="times">
+      <div></div>
+      <div>6:00</div>
+      <div>12:00</div>
+      <div>18:00</div>
+      <div></div>
+      <span id="time"></span>
+    </div>
+    
+    <div id="months">
+      <div>Jan</div>
+      <div>Feb</div>
+      <div>Mar</div>
+      <div>Apr</div>
+      <div>May</div>
+      <div>Jun</div>
+      <div>Jul</div>
+      <div>Aug</div>
+      <div>Sep</div>
+      <div>Oct</div>
+      <div>Nov</div>
+      <div>Dec</div>      
+      <span id="date">10</span>
+    </div>
+  </body> 
+</html>
