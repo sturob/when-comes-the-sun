@@ -8,9 +8,139 @@
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js">    
     </script>
 
-    <script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script>
+    <!-- script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script -->
+
+
+
+
+
 
     <script type="text/javascript">
+
+      var DB = {
+        "Aberdeen, Scotland": [57.9, -2.9],
+        "Adelaide, Australia ": [-34.55 , 138.36],
+        "Algiers, Algeria": [36.0, 3.0],
+        "Amsterdam, Netherlands": [52.22, 4.53],
+        "Ankara, Turkey ": [39.55, 32.55],
+        "Asunción, Paraguay ": [-25.15, -57.40],
+        "Athens, Greece": [37.58, 23.43],
+        "Auckland, New Zealand ": [-36.52, 174.45],
+        "Bangkok, Thailand ": [13.45, 100.30],
+        "Barcelona, Spain": [41.23, 2.9],
+        "Beijing, China": [39.55, 116.25],
+        "Belém, Brazil ": [-1.28, -48.29],
+        "Belfast, Northern Ireland ": [54.37, -5.56],
+        "Belgrade, Serbia ": [44.52, 20.32],
+        "Berlin, Germany": [52.30, 13.25],
+        "Birmingham, England ": [52.25, -1.55 ],
+        "Bogotá, Colombia ": [4.32, -74.15 ],
+        "Bombay, India": [19.0, 72.48],
+        "Bordeaux, France ": [44.50, -0.31 ],
+        "Bremen, Germany ": [53.5, 8.49],
+        "Brisbane, Australia ": [-27.29 , 153.8],
+        "Bristol, England ": [51.28, -2.35],
+        "Brussels, Belgium": [50.52, 4.22],
+        "Bucharest, Romania": [44.25, 26.7],
+        "Budapest, Hungary": [47.30, 19.5],
+        "Buenos Aires, Argentina": [-34.35, -58.22],
+        "Cairo, Egypt": [30.2, 31.21],
+        "Calcutta, India": [22.34, 88.24],
+        "Canton, China": [23.7, 113.15],
+        "Cape Town, South Africa": [-33.55, 18.22],
+        "Caracas, Venezuela ": [10.28, -67.2 ],
+        "Cayenne, French Guiana ": [4.49, -52.18 ],
+        "Chihuahua, Mexico ": [28.37, -106.5 ],
+        "Chongqing, China ": [29.46, 106.34],
+        "Copenhagen, Denmark": [55.40, 12.34],
+        "Córdoba, Argentina ": [-31.28 , -64.10 ],
+        "Dakar, Senegal ": [14.40, -17.28 ],
+        "Darwin, Australia ": [-12.28 , 130.51],
+        "Djibouti, Djibouti": [11.30, 43.3],
+        "Dublin, Ireland": [53.20, -6.15 ],
+        "Durban, South Africa ": [-29.53, 30.53],
+        "Edinburgh, Scotland ": [55.55, -3.10],
+        "Frankfurt, Germany": [50.7, 8.41],
+        "Georgetown, Guyana ": [6.45, -58.15 ],
+        "Glasgow, Scotland ": [55.50, -4.15 ],
+        "Guatemala City, Guatemala ": [14.37, -90.31],
+        "Guayaquil, Ecuador ": [-2.10 , -79.56],
+        "Hamburg, Germany": [53.33, 10.2],
+        "Hammerfest, Norway ": [70.38, 23.38],
+        "Havana, Cuba": [23.8, -82.23],
+        "Helsinki, Finland ": [60.10, 25.0],
+        "Hobart, Tasmania ": [-42.52, 147.19],
+        "Hong Kong, China": [22.20, 114.11],
+        "Iquique, Chile ": [-20.10 , -70.7 ],
+        "Irkutsk, Russia ": [52.30, 104.20],
+        "Jakarta, Indonesia ": [-6.16, 106.48],
+        "Johannesburg, South Africa ": [-26.12, 28.4],
+        "Kingston, Jamaica ": [17.59, -76.49],
+        "Kinshasa, Congo": [-4.18, 15.17],
+        "Kuala Lumpur, Malaysia": [3.8, 101.42],
+        "La Paz, Bolivia ": [-16.27, -68.22],
+        "Leeds, England ": [53.45, -1.30],
+        "Lima, Peru ": [-12.0 , -77.2 ],
+        "Lisbon, Portugal": [38.44, -9.9],
+        "Liverpool, England ": [53.25, -3.0 ],
+        "London, England": [51.32, -0.5 ],
+        "Lyons, France ": [45.45, 4.50],
+        "Madrid, Spain": [40.26, -3.42 ],
+        "Manchester, England ": [53.30, -2.15 ],
+        "Manila, Philippines": [14.35, 120.57],
+        "Marseilles, France ": [43.20, 5.20],
+        "Mazatlán, Mexico ": [23.12, -106.25 ],
+        "Mecca, Saudi Arabia ": [21.29, 39.45],
+        "Melbourne, Australia": [-37.47 , 144.58],
+        "Mexico City, Mexico": [19.26, -99.7 ],
+        "Milan, Italy ": [45.27, 9.10],
+        "Montevideo, Uruguay ": [-34.53, -56.10 ],
+        "Moscow, Russia": [55.45, 37.36],
+        "Munich, Germany ": [48.8, 11.35],
+        "Nagasaki, Japan ": [32.48, 129.57],
+        "Nagoya, Japan ": [35.7, 136.56],
+        "Nairobi, Kenya ": [-1.25, 36.55],
+        "Nanjing (Nanking), China ": [32.3, 118.53],
+        "Naples, Italy ": [40.50, 14.15],
+        "New Delhi, India": [28.35, 77.12],
+        "Newcastle-on-Tyne, England ": [54.58, -1.37 ],
+        "Odessa, Ukraine ": [46.27, 30.48],
+        "Osaka, Japan ": [34.32, 135.30],
+        "Oslo, Norway": [59.57, 10.42],
+        "Panama City, Panama ": [8.58, -79.32 ],
+        "Paramaribo, Suriname ": [5.45, -55.15],
+        "Paris, France": [48.48, 2.20],
+        "Perth, Australia ": [-31.57 , 115.52],
+        "Plymouth, England ": [50.25, -4.5 ],
+        "Port Moresby, Papua New Guinea ": [-9.25, 147.8],
+        "Prague, Czech Republic": [50.5, 14.26],
+        "Rangoon, Myanmar": [16.50, 96.0],
+        "Reykjavík, Iceland ": [64.4, -21.58 ],
+        "Rio de Janeiro, Brazil": [-22.57, -43.12 ],
+        "Rome, Italy": [41.54, 12.27],
+        "Salvador, Brazil ": [-12.56 , -38.27 ],
+        "Santiago, Chile ": [-33.28, -70.45 ],
+        "St. Petersburg, Russia": [59.56, 30.18],
+        "São Paulo, Brazil ": [-23.31, -46.31],
+        "Shanghai, China ": [31.10, 121.28],
+        "Singapore, Singapore": [1.14, 103.55],
+        "Sofia, Bulgaria ": [42.40, 23.20],
+        "Stockholm, Sweden": [59.17, 18.3],
+        "Sydney, Australia ": [-34.0, 151.0],
+        "Tananarive, Madagascar ": [-18.50, 47.33],
+        "Teheran, Iran ": [35.45, 51.45],
+        "Tokyo, Japan": [35.40, 139.45],
+        "Tripoli, Libya ": [32.57, 13.12],
+        "Venice, Italy": [45.26, 12.20],
+        "Veracruz, Mexico ": [19.10, -96.10 ],
+        "Vienna, Austria": [48.14, 16.20],
+        "Vladivostok, Russia ": [43.10, 132.0],
+        "Warsaw, Poland": [52.14, 21.0],
+        "Wellington, New Zealand ": [-41.17, 174.47],
+        "Zürich, Switzerland": [47.21, 8.31]
+      };
+
+
       
       Date.prototype.getDayOfTheYear = function() {
         var onejan = new Date(this.getFullYear(),0,1);
@@ -185,13 +315,12 @@
           while (UT >= 24) UT -= 24.0;
           while (UT <  0)  UT += 24.0;
 
-
           return UT;
       }
       
       
-      
-      var X = 365,
+      var LOCATION = 'London, England';
+          X = 365,
           Y = 24,
           X_SCALE = 1,
           Y_SCALE = 20,
@@ -199,22 +328,59 @@
           HOUR_IN_MS = 60 * 60 * 1000;
           DAY_IN_MS = HOUR_IN_MS * 24,
           current_day = JAN_FIRST.getTime(),
-          LONG = 51, // geo.ll[0].long,
-          LAT = 0, // geo.ll[0].lat,
+          // LONG = 64, // geo.ll[0].long,
+          // LAT = 21, // geo.ll[0].lat,
+          // LONG = 51,
+          // LAT = 1,
+          
+          LONG = DB[LOCATION][0],
+          LAT = DB[LOCATION][1],
           TODAY = new Date(),
           ROUGH_TWILIGHT_LENGTH = 0;
           
-      var CITY = geo.ll[2].city;
+      // var CITY = geo.ll[2].city;
 
       var DST_START = new Date("28 March 2010"),
           DST_END = new Date("31 October 2010");
         
-          
-      function do_onload () {
+      
+      $(window).ready(function() {
+        $.each(DB, function(city, ll) {
+          $('#cities').append("<span>" + city + "</span> ");
+        });
+      
+        // $('#cities').hide();
+      
+        $('#cities span').click(function() {
+          var city = $(this).text();
+          LOCATION = city;
+          LONG = DB[city][0];
+          LAT = DB[city][1];
+          $('#cities').fadeOut();
+          refresh();
+        });
+      
+        $('h1 a').click(function() {
+          $('#cities').toggle();
+        });
+
+        setInterval(refresh, 20000);      
+      });
+      
+
+      
+      function refresh() {
         // $('#example').height(Y * Y_SCALE).width(X * X_SCALE);
+        
+        TODAY = new Date();
+        current_day = JAN_FIRST.getTime(),
+        
+        $('h1 span#location').text(LOCATION);
         
         var example = document.getElementById('example');
         var cx = example.getContext('2d');
+        cx.clearRect (0, 0, 1000, 1000);
+
         var previous_state = 'night'; // twilight | day
       
         for (var x=0; x < X; x++) {
@@ -237,11 +403,11 @@
             }
           }
           
-          if (current_date > DST_START && current_date < DST_END ) {
-            sunrise += 1;
-            sunset += 1;
-            dusk += 1;
-            dawn += 1;  
+          if ((current_date > DST_START) && (current_date < DST_END) ) {
+            // sunrise += 1;
+            // sunset += 1;
+            // dusk += 1;
+            // dawn += 1;  
           }
           
           cx.fillStyle = "rgb(240,240,255)";
@@ -327,16 +493,17 @@
         }
         
         // today line
-        cx.fillStyle = "rgba(255,128,0, 0.4)";
-        cx.fillRect(X_SCALE * TODAY.getDayOfTheYear(), 0, 1, Y * Y_SCALE);
+        cx.fillStyle = "rgba(150,150,0, 0.4)";
+        cx.fillRect(X_SCALE * TODAY.getDayOfTheYear(), 1, 1, Y * Y_SCALE);
                 
         // time gridlines
-        cx.fillStyle = "rgba(180,180,180,0.25)";
-        cx.fillRect(0, 0, X * X_SCALE, 1);
-        cx.fillRect(0, 6 * Y_SCALE, X * X_SCALE, 1);
-        cx.fillRect(0, 12 * Y_SCALE, X * X_SCALE, 1);
-        cx.fillRect(0, 18 * Y_SCALE, X * X_SCALE, 1);  
-        cx.fillRect(0, 24 * Y_SCALE, X * X_SCALE, 1);       
+        cx.fillStyle = "rgba(180,180,180,0.2)";
+        
+        for (var i = 0; i < 25; ++i) {
+          if (i % 6 == 0) { 
+            cx.fillRect(0, i * Y_SCALE, X * X_SCALE, 1);
+          }
+        }
         
 
 
@@ -363,7 +530,7 @@
           sunset += 1;
         }
 
-        // sun rise + set verticals
+        // sun rise + set horizontals
         cx.fillStyle = "rgba(130,130,100,1)";
 
         cx.fillRect(TODAY.getDayOfTheYear() - 2, Math.floor(sunrise * Y_SCALE), 5, 1);
@@ -439,7 +606,48 @@
         color: #aaa;
         margin-top: 4px;
         font-size: 12px;
+        cursor: pointer;
+        
       }
+      
+      h1 a:hover {
+        color: white !important;
+      }
+      
+      #cities {
+        font-weight: 100;
+        font-family: "Helvetica Neue";
+        letter-spacing: 3px;
+        display: none;
+        position: absolute;
+        top: 24px;
+/*        background:;*/
+        font-size: 14px;
+        margin: 48px 24px;
+        background: rgba(0,0,0,0.8);
+        z-index: 1;
+        left: 0;
+        color: #ccc;
+        line-height: 1.8em;
+/*        word-spacing: -5px;*/
+        text-align: center;
+        
+      }
+
+      #cities span {
+        margin-right: 24px;
+/*        display: block;*/
+/*        float: left;*/
+        white-space: nowrap;
+        border-bottom: 1px solid #999;
+/*          padding: 0 12px 0 12px;*/
+      }
+
+      #cities span:hover {
+        color: white;
+        cursor: pointer;
+      }
+
       
       div#main {
         height: 481px;
@@ -542,9 +750,12 @@
     </style> 
   </head> 
    
-  <body onload="do_onload();"> 
+  <body onload="refresh();"> 
     
-    <h1>Darkness reigns in London <a>Change city</a></h1>
+    <h1>Darkness reigns in <span id="location">London</span> <a>Change city</a></h1>
+    
+    <div id="cities">
+    </div>
     
     <div id="main">
       <canvas id="example" width="730" height="481">
