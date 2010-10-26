@@ -8,6 +8,8 @@
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js">    
     </script>
 
+    <script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script>
+
     <script type="text/javascript">
       
       Date.prototype.getDayOfTheYear = function() {
@@ -190,21 +192,27 @@
       
       
       var X = 365,
-          Y = 240;
+          Y = 24,
+          X_SCALE = 1,
+          Y_SCALE = 20,
           JAN_FIRST = new Date('2010/01/01'),
           HOUR_IN_MS = 60 * 60 * 1000;
           DAY_IN_MS = HOUR_IN_MS * 24,
           current_day = JAN_FIRST.getTime(),
-          LONG = 51.21,
-          LAT = -0.11,
+          LONG = 51, // geo.ll[0].long,
+          LAT = 0, // geo.ll[0].lat,
           TODAY = new Date(),
           ROUGH_TWILIGHT_LENGTH = 0;
+          
+      var CITY = geo.ll[2].city;
 
       var DST_START = new Date("28 March 2010"),
           DST_END = new Date("31 October 2010");
         
-  
+          
       function do_onload () {
+        // $('#example').height(Y * Y_SCALE).width(X * X_SCALE);
+        
         var example = document.getElementById('example');
         var cx = example.getContext('2d');
         var previous_state = 'night'; // twilight | day
@@ -238,22 +246,20 @@
           
           cx.fillStyle = "rgb(240,240,255)";
 
-
           // main daylight
           if (sunrise) {
-            cx.fillRect(x, sunrise * 10, 1, (sunset - sunrise) * 10);
+            cx.fillRect(x * X_SCALE, sunrise * Y_SCALE, X_SCALE, (sunset - sunrise) * Y_SCALE);
           } else {
             if (previous_state == 'day') {
-              cx.fillRect(x, 0, 1, 240);
+              cx.fillRect(x * X_SCALE, 0, X_SCALE, Y * Y_SCALE);
             }
-            
             // previous_state bug code here
           }
           
           // dawn twilight
           if (sunrise && dawn) {
-            var dawn_length = (sunrise - dawn) * 10,
-                dawn_pos = dawn * 10,          
+            var dawn_length = (sunrise - dawn) * Y_SCALE,
+                dawn_pos = dawn * Y_SCALE,          
                 ROUGH_TWILIGHT_LENGTH = dawn_length;
       
             var dawngrad = cx.createLinearGradient(0, dawn_pos, 0, dawn_length + dawn_pos);  
@@ -261,27 +267,27 @@
                 dawngrad.addColorStop(1.0, 'rgb(240,240,255)');  
 
             cx.fillStyle = dawngrad;
-            cx.fillRect(x, dawn_pos, 1, dawn_length + 1);
+            cx.fillRect(x * X_SCALE, dawn_pos, X_SCALE, dawn_length + 1);
           }
           
           
           // dusk twilight
           if (sunset && dusk) {
-            var dusk_length = (dusk - sunset) * 10,
-                dusk_pos = dusk * 10;
+            var dusk_length = (dusk - sunset) * Y_SCALE,
+                dusk_pos = dusk * Y_SCALE;
           
-            var duskgrad = cx.createLinearGradient(0, sunset * 10, 0, dusk_pos);  
+            var duskgrad = cx.createLinearGradient(0, sunset * Y_SCALE, 0, dusk_pos);  
                 duskgrad.addColorStop(1, '#000028');  
                 duskgrad.addColorStop(0, 'rgb(240,240,255)');  
 
             cx.fillStyle = duskgrad;
-            cx.fillRect(x, (sunset * 10) - 1, 1, dusk_length);
+            cx.fillRect(x * X_SCALE, (sunset * Y_SCALE) - 1, X_SCALE, dusk_length);
           }
           
           // winter permi-darkness
           if (dawn && dusk && ! sunset && ! sunrise) {
-            var dawn_pos = dawn * 10,
-                dusk_pos = dusk * 10;
+            var dawn_pos = dawn * Y_SCALE,
+                dusk_pos = dusk * Y_SCALE;
           
             var grad = cx.createLinearGradient(0, dawn_pos, 0, dusk_pos);  
                 grad.addColorStop(0, '#000028');  
@@ -290,64 +296,63 @@
                 grad.addColorStop(1, '#000028');
 
             cx.fillStyle = grad;
-            cx.fillRect(x, dawn_pos, 1, dusk_pos);
+            cx.fillRect(x * X_SCALE, dawn_pos, X_SCALE, dusk_pos);
           } 
 
           // summer night twilight
           if ((sunrise || sunset) && ! dusk && ! dawn) {
             if (sunrise) {
-              var dawn_length = sunrise * 10;
+              var dawn_length = sunrise * Y_SCALE;
 
               var grad = cx.createLinearGradient(0, 0, 0, dawn_length);  
                   grad.addColorStop(0, '#000028');  
                   grad.addColorStop(1.0, 'rgb(240,240,255)');  
 
               cx.fillStyle = grad;
-              cx.fillRect(x, 0 , 1, dawn_length + 1);
+              cx.fillRect(x * X_SCALE, 0, X_SCALE, dawn_length + 1);
             }
             if (sunset) {
-              var dusk_pos = sunset * 10;
+              var dusk_pos = sunset * Y_SCALE;
 
               var grad = cx.createLinearGradient(0, dusk_pos, 0,  Y );  
                   grad.addColorStop(1.0, '#000028');  
                   grad.addColorStop(0, 'rgb(240,240,255)');  
 
               cx.fillStyle = grad;
-              cx.fillRect(x, dusk_pos - 1, 1, Y );
+              cx.fillRect(x * X_SCALE, dusk_pos - 1, X_SCALE, Y );
             }
           }
           
-          
-
           current_day += DAY_IN_MS;
         }
         
-        
-        
-        var shade = 160;
+        // today line
         cx.fillStyle = "rgba(255,128,0, 0.4)";
-        cx.fillRect(TODAY.getDayOfTheYear(), 0, 1, 245);
-        
-        // cx.fillStyle = "rgb(255, " + shade + ", " + shade + ")";
-        // cx.fillRect(0, Math.floor(TODAY.getMinuteOfTheDay() / 6), 365, 0.5);
-        
+        cx.fillRect(X_SCALE * TODAY.getDayOfTheYear(), 0, 1, Y * Y_SCALE);
+                
+        // time gridlines
         cx.fillStyle = "rgba(180,180,180,0.25)";
-        cx.fillRect(0, 0, 365, 1);
-        cx.fillRect(0, 60, 365, 1);
-        cx.fillRect(0, 120, 365, 1);
-        cx.fillRect(0, 180, 365, 1);  
-        cx.fillRect(0, 240, 365, 1);       
-             
+        cx.fillRect(0, 0, X * X_SCALE, 1);
+        cx.fillRect(0, 6 * Y_SCALE, X * X_SCALE, 1);
+        cx.fillRect(0, 12 * Y_SCALE, X * X_SCALE, 1);
+        cx.fillRect(0, 18 * Y_SCALE, X * X_SCALE, 1);  
+        cx.fillRect(0, 24 * Y_SCALE, X * X_SCALE, 1);       
+        
 
+
+        
+        var now_minutes_pos = Math.floor(TODAY.getMinuteOfTheDay() / 60 * Y_SCALE);
+
+        // sun right aligned
         cx.fillStyle = "rgba(255,255,0,1)";
+        cx.fillRect(X_SCALE * X - 1, now_minutes_pos, X_SCALE, 1);
 
-        cx.fillRect(365, Math.floor(TODAY.getMinuteOfTheDay() / 6), 2, 1);
-
-
+        // the sun square
         cx.fillStyle = "rgba(0,0,0,0.5)";
-        cx.fillRect(TODAY.getDayOfTheYear() - 2, Math.floor(TODAY.getMinuteOfTheDay() / 6) - 2, 5, 5);        
+        cx.fillRect(
+          X_SCALE * TODAY.getDayOfTheYear() - 2, now_minutes_pos - 2, 5, 5); 
         cx.fillStyle = "rgb(255,255,0)";
-        cx.fillRect(TODAY.getDayOfTheYear() - 1, Math.floor(TODAY.getMinuteOfTheDay() / 6) - 1, 3, 3);
+        cx.fillRect(X_SCALE * TODAY.getDayOfTheYear() - 1, now_minutes_pos - 1, 3, 3);
         
         
         var sunrise = CalculateSunriseOrSunset(LONG, LAT, TODAY, true);
@@ -357,23 +362,29 @@
           sunrise += 1;
           sunset += 1;
         }
-        
+
+        // sun rise + set verticals
         cx.fillStyle = "rgba(130,130,100,1)";
 
-        cx.fillRect(TODAY.getDayOfTheYear() - 2, Math.floor(sunrise * 10), 5, 1);
-        cx.fillRect(TODAY.getDayOfTheYear() - 2, Math.floor(sunset * 10), 5, 1);
+        cx.fillRect(TODAY.getDayOfTheYear() - 2, Math.floor(sunrise * Y_SCALE), 5, 1);
+        cx.fillRect(TODAY.getDayOfTheYear() - 2, Math.floor(sunset * Y_SCALE), 5, 1);
         
-        cx.fillStyle = "rgba(200,200,200,1)";
+        cx.fillStyle = "rgba(150,150,150,1)";
         
-        cx.fillRect(365, Math.floor(sunrise * 10), 12, 1);
-        cx.fillRect(365, Math.floor(sunset * 10), 12, 1);
+        cx.fillRect(X * X_SCALE, Math.floor(sunrise * Y_SCALE), 12, 1);
+        cx.fillRect(X * X_SCALE, Math.floor(sunset * Y_SCALE), 12, 1);
         
-        $('#rise').css( { top: Math.floor(sunrise * 10) - 8 }).find('span').text(n_to_time(sunrise));
-        $('#set').css( { top: Math.floor(sunset * 10) - 8 }).find('span').text(n_to_time(sunset));
+        $('#rise').css({ 
+          top: Math.floor(sunrise * Y_SCALE) - 8
+        }).find('span').text(n_to_time(sunrise));
+        
+        $('#set').css({
+           top: Math.floor(sunset * Y_SCALE) - 8 
+        }).find('span').text(n_to_time(sunset));
 
-        $('#months span#date').text(TODAY.getDate()).css({ left: TODAY.getMonth() * 30 + 2 });
+        $('#months span#date').text(TODAY.getDate()).css({ left: TODAY.getMonth() * 30 + 4 });
 
-        $('#times span').text(time_to_hhmm(TODAY)).css({ top: (TODAY.getMinutes() + TODAY.getHours() * 60) / 6 - 2 });
+        $('#times span').text(time_to_hhmm(TODAY)).css({ top: now_minutes_pos - 4 });
 
         $($('#months div').get(TODAY.getMonth())).addClass('ACTIVE');
       }
@@ -405,7 +416,39 @@
       body {
         font-family: Georgia;
         background: #000028;
-        padding: 24px 48px;
+/*        padding: 24px 48px;*/
+        height: 100%;
+      }
+      
+      h1 {
+        font-size: 24px;
+        position: absolute;
+        top: 12px;
+        width: 100%;
+        text-align: center;
+        color: #fff;
+        font-weight: 100;
+        font-family: "Helvetica Neue";
+        letter-spacing: 2px;
+        
+      }
+      
+      h1 a {
+        text-decoration: underline;
+        display: block;
+        color: #aaa;
+        margin-top: 4px;
+        font-size: 12px;
+      }
+      
+      div#main {
+        height: 481px;
+        position: relative;
+        top: 50%;
+        left: 0px;
+        width: 370px;
+        margin: -240px auto 0;
+/*        outline: 1px solid red;*/
       }
       
       canvas {
@@ -414,17 +457,17 @@
       
       #times {
         position: absolute;
-        top: 32px;
-        left: 12px;
-        color: #555;
+        top: 8px;
+        left: -48px;
+        color: #556;
 /*        left: -6px;*/
-        font-size: 11px;
-        margin-top: -14px;
+        font-size: 14px;
+        margin-top: -15px;
       }
       
       #times div {
         text-align: right;
-        height: 60px;
+        height: 120px;
       }
       
       #times span {
@@ -442,9 +485,9 @@
       
       #months {
         position: absolute;
-        top: 264px;
-        color: #555;
-        width: 365px;
+        bottom: -24px;
+        color: #335;
+/*        width: 730px;*/
         vertical-align: middle;
         padding-left: 2px;
 /*        overflow: hidden;*/
@@ -455,7 +498,8 @@
 /*        background: black;*/
         height: 24px;
         padding-top: 6px;
-        font-size: 11px;
+        font-size: 12px;
+        letter-spacing: -1px;
         width: 30px;
         text-align: center;
         float: left;
@@ -478,10 +522,10 @@
       }
       
       #sun {
-        font-size: 11px;
+        font-size: 14px;
         position: absolute;
-        top: 24px;
-        left: 420px;
+        top: 0px;
+        right: -12px;
         color: #888;
         text-transform: uppercase;
       }
@@ -493,48 +537,53 @@
       
       #sun span {
         margin: 0 4px;
-        color: #eee;
+        color: #ccd;
       }
     </style> 
   </head> 
    
   <body onload="do_onload();"> 
-    <canvas id="example" width="370" height="241">
-      This text is displayed if your browser does not support HTML5 Canvas.
-    </canvas>
     
-    <div id="sun">
-      <div id="rise">
-        <span id='sunrise'></span> &uarr;
+    <h1>Darkness reigns in London <a>Change city</a></h1>
+    
+    <div id="main">
+      <canvas id="example" width="730" height="481">
+        This text is displayed if your browser does not support HTML5 Canvas.
+      </canvas>
+    
+      <div id="sun">
+        <div id="rise">
+          <span id='sunrise'></span> &uarr;
+        </div>
+        <div id="set">
+          <span id="sunset"></span> &darr;
+        </div>
       </div>
-      <div id="set">
-        <span id="sunset"></span> &darr;
+    
+      <div id="times">
+        <div></div>
+        <div>6:00</div>
+        <div>12:00</div>
+        <div>18:00</div>
+        <div></div>
+        <span id="time"></span>
       </div>
-    </div>
     
-    <div id="times">
-      <div></div>
-      <div>6:00</div>
-      <div>12:00</div>
-      <div>18:00</div>
-      <div></div>
-      <span id="time"></span>
-    </div>
-    
-    <div id="months">
-      <div>Jan</div>
-      <div>Feb</div>
-      <div>Mar</div>
-      <div>Apr</div>
-      <div>May</div>
-      <div>Jun</div>
-      <div>Jul</div>
-      <div>Aug</div>
-      <div>Sep</div>
-      <div>Oct</div>
-      <div>Nov</div>
-      <div>Dec</div>      
-      <span id="date">10</span>
+      <div id="months">
+        <div>Jan</div>
+        <div>Feb</div>
+        <div>Mar</div>
+        <div>Apr</div>
+        <div>May</div>
+        <div>Jun</div>
+        <div>Jul</div>
+        <div>Aug</div>
+        <div>Sep</div>
+        <div>Oct</div>
+        <div>Nov</div>
+        <div>Dec</div>      
+        <span id="date">10</span>
+      </div>
     </div>
   </body> 
 </html>
