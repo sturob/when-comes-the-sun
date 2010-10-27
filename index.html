@@ -1,0 +1,877 @@
+<html> 
+  <head> 
+    <title>When Comes the Sun</title> 
+
+    <meta name="format-detection" content="event=no" >
+
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js">    
+    </script>
+
+    <!-- script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script -->
+
+    <script type="text/javascript">
+
+      // long, lat, timezone, 
+
+      var DB = {
+        "Aberdeen, Scotland": [57.9, -2.9],
+        "Adelaide, Australia ": [-34.55 , 138.36],
+        "Algiers, Algeria": [36.0, 3.0],
+        "Amsterdam, Netherlands": [52.22, 4.53],
+        "Ankara, Turkey ": [39.55, 32.55],
+        // "Asunción, Paraguay ": [-25.15, -57.40],
+        "Athens, Greece": [37.58, 23.43],
+        "Auckland, New Zealand ": [-36.52, 174.45],
+        "Bangkok, Thailand ": [13.45, 100.30],
+        "Barcelona, Spain": [41.23, 2.9],
+        "Beijing, China": [39.55, 116.25],
+        // "Belém, Brazil ": [-1.28, -48.29],
+        "Belfast, Northern Ireland ": [54.37, -5.56],
+        "Belgrade, Serbia ": [44.52, 20.32],
+        "Berlin, Germany": [52.30, 13.25],
+        "Birmingham, England ": [52.25, -1.55 ],
+        "Bogota, Colombia ": [4.32, -74.15 ],
+        "Bombay, India": [19.0, 72.48],
+        "Bordeaux, France ": [44.50, -0.31 ],
+        "Bremen, Germany ": [53.5, 8.49],
+        "Brisbane, Australia ": [-27.29 , 153.8],
+        "Bristol, England ": [51.28, -2.35],
+        "Brussels, Belgium": [50.52, 4.22],
+        "Bucharest, Romania": [44.25, 26.7],
+        "Budapest, Hungary": [47.30, 19.5],
+        "Buenos Aires, Argentina": [-34.35, -58.22],
+        "Cairo, Egypt": [30.2, 31.21],
+        "Calcutta, India": [22.34, 88.24],
+        "Canton, China": [23.7, 113.15],
+        "Cape Town, South Africa": [-33.55, 18.22],
+        "Caracas, Venezuela ": [10.28, -67.2 ],
+        "Cayenne, French Guiana ": [4.49, -52.18 ],
+        "Chihuahua, Mexico ": [28.37, -106.5 ],
+        // "Chongqing, China ": [29.46, 106.34],
+        "Copenhagen, Denmark": [55.40, 12.34],
+        "Cordoba, Argentina ": [-31.28 , -64.10 ],
+        "Dakar, Senegal ": [14.40, -17.28 ],
+        "Darwin, Australia ": [-12.28 , 130.51],
+        "Djibouti, Djibouti": [11.30, 43.3],
+        "Dublin, Ireland": [53.20, -6.15 ],
+        "Durban, South Africa ": [-29.53, 30.53],
+        "Edinburgh, Scotland ": [55.55, -3.10],
+        "Frankfurt, Germany": [50.7, 8.41],
+        "Georgetown, Guyana ": [6.45, -58.15 ],
+        "Glasgow, Scotland ": [55.50, -4.15 ],
+        "Guatemala City, Guatemala ": [14.37, -90.31],
+        "Guayaquil, Ecuador ": [-2.10 , -79.56],
+        "Hamburg, Germany": [53.33, 10.2],
+        // "Hammerfest, Norway ": [70.38, 23.38],
+        "Havana, Cuba": [23.8, -82.23],
+        "Helsinki, Finland ": [60.10, 25.0],
+        // "Hobart, Tasmania ": [-42.52, 147.19],
+        "Hong Kong, China": [22.20, 114.11],
+        "Iquique, Chile ": [-20.10 , -70.7 ],
+        "Irkutsk, Russia ": [52.30, 104.20],
+        "Jakarta, Indonesia ": [-6.16, 106.48],
+        "Johannesburg, South Africa ": [-26.12, 28.4],
+        "Kingston, Jamaica ": [17.59, -76.49],
+        "Kinshasa, Congo": [-4.18, 15.17],
+        "Kuala Lumpur, Malaysia": [3.8, 101.42],
+        "La Paz, Bolivia ": [-16.27, -68.22],
+        // "Leeds, England ": [53.45, -1.30],
+        "Lima, Peru ": [-12.0 , -77.2 ],
+        "Lisbon, Portugal": [38.44, -9.9],
+        "Liverpool, England ": [53.25, -3.0 ],
+        "London, England": [51.32, -0.5 ],
+        "Lyons, France ": [45.45, 4.50],
+        "Madrid, Spain": [40.26, -3.42 ],
+        "Manchester, England ": [53.30, -2.15 ],
+        "Manila, Philippines": [14.35, 120.57],
+        "Marseilles, France ": [43.20, 5.20],
+        // "Mazatlán, Mexico ": [23.12, -106.25 ],
+        "Mecca, Saudi Arabia ": [21.29, 39.45],
+        "Melbourne, Australia": [-37.47 , 144.58],
+        "Mexico City, Mexico": [19.26, -99.7 ],
+        "Milan, Italy ": [45.27, 9.10],
+        "Montevideo, Uruguay ": [-34.53, -56.10 ],
+        "Moscow, Russia": [55.45, 37.36],
+        "Munich, Germany ": [48.8, 11.35],
+        "Nagasaki, Japan ": [32.48, 129.57],
+        "Nagoya, Japan ": [35.7, 136.56],
+        "Nairobi, Kenya ": [-1.25, 36.55],
+        "Nanjing (Nanking), China ": [32.3, 118.53],
+        "Naples, Italy ": [40.50, 14.15],
+        "New Delhi, India": [28.35, 77.12],
+        "New York City, USA": [40.47, 73.58],
+        "Newcastle-on-Tyne, England ": [54.58, -1.37 ],
+        "Odessa, Ukraine ": [46.27, 30.48],
+        "Osaka, Japan ": [34.32, 135.30],
+        "Oslo, Norway": [59.57, 10.42],
+        "Panama City, Panama ": [8.58, -79.32 ],
+        "Paramaribo, Suriname ": [5.45, -55.15],
+        "Paris, France": [48.48, 2.20],
+        "Perth, Australia ": [-31.57 , 115.52],
+        "Plymouth, England ": [50.25, -4.5 ],
+        "Port Moresby, Papua New Guinea ": [-9.25, 147.8],
+        "Prague, Czech Republic": [50.5, 14.26],
+        "Rangoon, Myanmar": [16.50, 96.0],
+        "Reykjavik, Iceland ": [64.4, -21.58 ],
+        "Rio de Janeiro, Brazil": [-22.57, -43.12 ],
+        "Rome, Italy": [41.54, 12.27],
+        "Salvador, Brazil ": [-12.56 , -38.27 ],
+        "Santiago, Chile ": [-33.28, -70.45 ],
+        "St. Petersburg, Russia": [59.56, 30.18],
+        "Sao Paulo, Brazil ": [-23.31, -46.31],
+        "Shanghai, China ": [31.10, 121.28],
+        "Singapore, Singapore": [1.14, 103.55],
+        "Sofia, Bulgaria ": [42.40, 23.20],
+        "Stockholm, Sweden": [59.17, 18.3],
+        "Sydney, Australia ": [-34.0, 151.0],
+        "Tananarive, Madagascar ": [-18.50, 47.33],
+        "Teheran, Iran ": [35.45, 51.45],
+        "Tokyo, Japan": [35.40, 139.45],
+        "Tripoli, Libya ": [32.57, 13.12],
+        "Venice, Italy": [45.26, 12.20],
+        // "Veracruz, Mexico ": [19.10, -96.10 ],
+        "Vienna, Austria": [48.14, 16.20],
+        "Vladivostok, Russia ": [43.10, 132.0],
+        "Warsaw, Poland": [52.14, 21.0],
+        "Wellington, New Zealand ": [-41.17, 174.47],
+        "Zurich, Switzerland": [47.21, 8.31]
+      };
+      
+
+      var DESCRIPTION = {
+        predawn: "Dawn approaches ",
+        dawn: "Day breaks over ",
+        morning: "Morning has broken in ",
+        day: "The sun hangs over ",
+        evening: "The sun tires in ",
+        dusk: "Night descends on ",
+        night: "Darkness reigns in ",
+        twilight: "Twilight hangs over "
+      };
+      
+      Date.prototype.getDayOfTheYear = function() {
+        var onejan = new Date(this.getFullYear(),0,1);
+        return Math.ceil((this - onejan) / 86400000);
+      }
+      
+      Date.prototype.getMinuteOfTheDay = function() {
+        return this.getHours() * 60 + this.getMinutes()
+      }
+      
+      
+      
+      // -- *D ---
+      //
+      // These trigonometry functions use degrees instead of radians.
+      //
+      function sinD(n)  { return Math.sin (n * 0.0174532925199433); }
+      function cosD(n)  { return Math.cos (n * 0.0174532925199433); }
+      function tanD(n)  { return Math.tan (n * 0.0174532925199433); }
+      function asinD(n) { return Math.asin(n) * 57.2957795130823;   }
+      function acosD(n) { return Math.acos(n) * 57.2957795130823;   }
+      function atanD(n) { return Math.atan(n) * 57.2957795130823;   }
+
+
+      function Int(n) { return n < 0 ? Math.ceil(n) : Math.floor(n); }
+      function Sign(n) { if (n < 0) return -1; if (n > 0) return 1; return 0; }
+
+
+      // -- isNull --
+      //
+      // Determines whether an object is null.
+      //
+      function isNull(anObject)
+      {
+          return typeof anObject == "object" && !anObject;
+      }
+
+
+      // --- CalculateSunriseOrSunset ---
+      //
+      // Calculates the time of sunrise or sunset at a given location on a given day.
+      //
+      // Parameters
+      //    latitude - latitude in degrees of location
+      //   longitude - longitude in degrees of location
+      //        date - Date object - day to calculate
+      //     sunrise - Boolean - whether to calculate sunrise (true) or sunset (false)
+      //    twilight - Boolean - whether to calculate twilight (true) or sunrise/sunset (false)
+      //
+      // Returns
+      //   floating-point hour of sun event in UTC
+      //     (e.g., 5.15 => 0509Z), or null if the event doesn't occur on the given day
+      //
+      function CalculateSunriseOrSunset(latitude, longitude, date, sunrise, twilight)
+      {
+          // Source:
+          //   Almanac for Computers, 1990
+          //   published by Nautical Almanac Office
+          //   United States Naval Observatory
+          //   Washington, DC 20392
+
+          day   = date.getDate();
+          month = date.getMonth() + 1;
+          year  = date.getFullYear();
+
+          var zenith;
+
+          if (twilight)
+          {
+              // twilightSelect = document.getElementById('twilight');
+              // zenith = twilightSelect.value;
+
+              // <option id="civilOption" value="96" selected></option>
+              // <option id="nauticalOption" value="102"></option>
+              // <option id="astronomicalOption" value="108"></option>
+              zenith = 99;
+          }
+          else
+              zenith = 90.8333333333;
+
+
+          // Calculate the day of the year.
+
+          N1 = Math.floor(275.0 * month / 9.0);
+          N2 = Math.floor((month + 9.0) / 12.0);
+          N3 = 1.0 + Math.floor((year - 4.0 * Math.floor(year / 4.0) + 2.0) / 3.0);
+          N = N1 - (N2 * N3) + day - 30.0;
+
+
+          // Convert the longitude to hour value and calculate an approximate time.
+
+          lngHour = longitude / 15.0;
+
+          if (sunrise)
+              t = N + ((6.0 - lngHour) / 24.0);
+          else
+              t = N + ((18.0 - lngHour) / 24.0)
+
+
+          // Calculate the sun's mean anomaly.
+
+          M = (0.9856 * t) - 3.289;
+
+
+          // Calculate the sun's true longitude.
+
+          L = M + (1.916 * sinD(M)) + (0.020 * sinD(2 * M)) + 282.634;
+
+          while (L >= 360) L -= 360.0;
+          while (L <  0)   L += 360.0;
+
+
+          // Caculate the sun's right ascension.
+
+          RA = atanD(0.91764 * tanD(L));
+
+          while (RA >= 360) RA -= 360.0;
+          while (RA <  0)   RA += 360.0;
+
+
+          // Right ascension value needs to be in the same quadrant as L.
+
+          Lquadrant = Math.floor(L / 90.0) * 90.0;
+          RAquadrant = Math.floor(RA / 90.0) * 90.0;
+          RA = RA + (Lquadrant - RAquadrant);
+
+
+          // Right ascension value needs to be converted into hours.
+
+          RA /= 15.0;
+
+
+          // Calculate the sun's declination.
+
+          sinDec = 0.39782 * sinD(L);
+          cosDec = cosD(asinD(sinDec));
+
+
+          // Calculate the sun's local hour angle.
+
+          cosH = (cosD(zenith) - (sinDec * sinD(latitude))) / (cosDec * cosD(latitude));
+
+          if (sunrise)
+          {
+              if (cosH > 1) return null;
+          }
+          else
+          {
+              if (cosH < -1) return null;
+          }
+
+
+          // Finish calculating H and convert into hours.
+
+          if (sunrise)
+              H = 360.0 - acosD(cosH);
+          else
+              H = acosD(cosH);
+
+          H /= 15.0
+
+
+          // Calculate local mean time of rising.
+
+          T = H + RA - (0.06571 * t) - 6.622;
+
+
+          // Adjust back to UTC.
+
+          UT = T - lngHour;
+
+          // remove me
+          UT += Math.ceil(longitude / 15);
+
+          while (UT >= 24) UT -= 24.0;
+          while (UT <  0)  UT += 24.0;
+
+          return UT;
+      }
+      
+      
+      function adjust_time_hack(hours) {
+        var tmp = hours + Math.ceil(LAT / 15);
+        while (tmp >= 24) tmp -= 24.0;
+        while (tmp <  0)  tmp += 24.0;
+        
+        return tmp;
+      }
+      
+      var LOCATION = 'London, England';
+          X = 365,
+          Y = 24,
+          X_SCALE = 1,
+          Y_SCALE = 20,
+          JAN_FIRST = new Date('2010/01/01'),
+          HOUR_IN_MS = 60 * 60 * 1000;
+          DAY_IN_MS = HOUR_IN_MS * 24,
+          current_day = JAN_FIRST.getTime(),
+          // LONG = 64, // geo.ll[0].long,
+          // LAT = 21, // geo.ll[0].lat,
+          // LONG = 51,
+          // LAT = 1,
+          
+          LONG = DB[LOCATION][0],
+          LAT = DB[LOCATION][1],
+          NOW = new Date(),
+          ROUGH_TWILIGHT_LENGTH = 0;
+          
+      // var CITY = geo.ll[2].city;
+
+      var DST_START = new Date("28 March 2010"),
+          DST_END = new Date("31 October 2010");
+        
+      
+      $(window).ready(function() {
+        $.each(DB, function(city, ll) {
+          $('#cities').append("<span>" + city + "</span> ");
+        });
+      
+        // $('#cities').hide();
+
+      
+        $('#cities span').click(function() {
+          var city = $(this).text();
+          LOCATION = city;
+          LONG = DB[city][0];
+          LAT = DB[city][1];
+          $('#cities').fadeOut();
+          refresh();
+        });
+      
+        $('h1 a').click(function() {
+          $('#cities').toggle();
+        });
+
+        setInterval(refresh, 20000);      
+      });
+      
+
+      
+      function refresh() {
+        // $('#example').height(Y * Y_SCALE).width(X * X_SCALE);
+        
+        NOW = new Date();
+        current_day = JAN_FIRST.getTime(),
+        
+        $('h1 span#location').html(LOCATION);
+        
+        var example = document.getElementById('example');
+        var cx = example.getContext('2d');
+        cx.clearRect (0, 0, 1000, 1000);
+
+        var previous_state = 'night'; // twilight | day
+      
+        for (var x=0; x < X; x++) {
+          var current_date = new Date(current_day);
+
+          var dawn = CalculateSunriseOrSunset(LONG, LAT, current_date, true, true);
+          var dusk = CalculateSunriseOrSunset(LONG, LAT, current_date, false, true);
+          
+          var sunrise = CalculateSunriseOrSunset(LONG, LAT, current_date, true);
+          var sunset = CalculateSunriseOrSunset(LONG, LAT, current_date, false);
+          
+          if (sunset !== null) { // return NaN for solid days :)
+            previous_state = 'night'
+          } else {
+            sunset = 24;
+            previous_state = 'day';
+
+            if (dusk !== null) {
+              previous_state = 'twilight';
+            }
+          }
+          
+          if ((current_date > DST_START) && (current_date < DST_END) ) {
+            sunrise += 1;
+            sunset += 1;
+            dusk += 1;
+            dawn += 1;
+          }
+          
+          cx.fillStyle = "rgb(240,240,255)";
+
+          // main daylight
+          if (sunrise) {
+            cx.fillRect(x * X_SCALE, sunrise * Y_SCALE, X_SCALE, (sunset - sunrise) * Y_SCALE);
+          } else {
+            if (previous_state == 'day') {
+              cx.fillRect(x * X_SCALE, 0, X_SCALE, Y * Y_SCALE);
+            }
+            // previous_state bug code here
+          }
+          
+          function draw_dawn () {          // dawn twilight
+            if (sunrise && dawn) {
+              var dawn_length = (sunrise - dawn) * Y_SCALE,
+                  dawn_pos = dawn * Y_SCALE,          
+                  ROUGH_TWILIGHT_LENGTH = dawn_length;
+    
+              var dawngrad = cx.createLinearGradient(0, dawn_pos, 0, dawn_length + dawn_pos);  
+                  dawngrad.addColorStop(0, '#000028');  
+                  dawngrad.addColorStop(1.0, 'rgb(240,240,255)');  
+
+              cx.fillStyle = dawngrad;
+              cx.fillRect(x * X_SCALE, dawn_pos, X_SCALE, dawn_length + 1);
+            }
+          }
+          
+          function draw_dusk (cx) {
+            // dusk twilight
+            if (sunset && dusk) {
+              var dusk_length = (dusk - sunset) * Y_SCALE,
+                  dusk_pos = dusk * Y_SCALE;
+          
+              var duskgrad = cx.createLinearGradient(0, sunset * Y_SCALE, 0, dusk_pos);  
+                  duskgrad.addColorStop(1, '#000028');  
+                  duskgrad.addColorStop(0, 'rgb(240,240,255)');  
+
+              cx.fillStyle = duskgrad;
+              cx.fillRect(x * X_SCALE, (sunset * Y_SCALE) - 1, X_SCALE, dusk_length);
+            }
+          }
+          
+          function draw_permidarkness (cx) {
+            // winter permi-darkness
+            if (dawn && dusk && ! sunset && ! sunrise) {
+              var dawn_pos = dawn * Y_SCALE,
+                  dusk_pos = dusk * Y_SCALE;
+
+              var grad = cx.createLinearGradient(0, dawn_pos, 0, dusk_pos);  
+                  grad.addColorStop(0, '#000028');  
+                  grad.addColorStop(0.3, 'rgb(100,100,110)');  
+                  grad.addColorStop(0.7, 'rgb(100,100,110)');  
+                  grad.addColorStop(1, '#000028');
+
+              cx.fillStyle = grad;
+              cx.fillRect(x * X_SCALE, dawn_pos, X_SCALE, dusk_pos);
+            }
+          }
+          
+          function draw_permitwilight(cx){
+            // summer night twilight
+            if ((sunrise || sunset) && ! dusk && ! dawn) {
+              if (sunrise) {
+                var dawn_length = sunrise * Y_SCALE;
+
+                var grad = cx.createLinearGradient(0, 0, 0, dawn_length);  
+                    grad.addColorStop(0, '#000028');  
+                    grad.addColorStop(1.0, 'rgb(240,240,255)');  
+
+                cx.fillStyle = grad;
+                cx.fillRect(x * X_SCALE, 0, X_SCALE, dawn_length + 1);
+              }
+              if (sunset) {
+                var dusk_pos = sunset * Y_SCALE;
+
+                var grad = cx.createLinearGradient(0, dusk_pos, 0,  Y);  
+                    grad.addColorStop(1.0, '#000028');  
+                    grad.addColorStop(0, 'rgb(240,240,255)');  
+
+                cx.fillStyle = grad;
+                cx.fillRect(x * X_SCALE, dusk_pos - 1, X_SCALE, Y);
+              }
+            }
+          }
+          
+          if (LONG < 58) {
+            draw_dawn(cx);
+            draw_dusk(cx);
+          }
+          draw_permidarkness(cx);
+          draw_permitwilight(cx);
+
+          
+          current_day += DAY_IN_MS;
+        }
+        
+        // today line
+        cx.fillStyle = "rgba(150, 150, 0, 0.4)";
+        cx.fillRect(X_SCALE * NOW.getDayOfTheYear(), 1, 1, Y * Y_SCALE);
+                
+        // time gridlines
+        cx.fillStyle = "rgba(180,180,180,0.2)";
+        for (var i = 0; i < 25; ++i) {
+          if (i % 6 == 0) { 
+            cx.fillRect(0, i * Y_SCALE, X * X_SCALE, 1);
+          }
+        }
+        
+        var guessed_hours = adjust_time_hack(NOW.getMinuteOfTheDay() / 60);
+        
+        var now_minutes_pos = Math.floor(guessed_hours * Y_SCALE);
+        // var now_minutes_pos = Math.floor(NOW.getMinuteOfTheDay() / 60 * Y_SCALE);
+
+        // sun right aligned
+        cx.fillStyle = "rgba(255,255,0,1)";
+        cx.fillRect(X_SCALE * X - 1, now_minutes_pos, X_SCALE, 1);
+
+        // the sun square
+        cx.fillStyle = "rgba(0,0,0,0.5)";
+        cx.fillRect(
+          X_SCALE * NOW.getDayOfTheYear() - 2, now_minutes_pos - 2, 5, 5); 
+        cx.fillStyle = "rgb(255,255,0)";
+        cx.fillRect(X_SCALE * NOW.getDayOfTheYear() - 1, now_minutes_pos - 1, 3, 3);
+        
+        
+        var sunrise = CalculateSunriseOrSunset(LONG, LAT, NOW, true);
+        var sunset = CalculateSunriseOrSunset(LONG, LAT, NOW, false);
+        var dawn = CalculateSunriseOrSunset(LONG, LAT, NOW, true, true);
+        var dusk = CalculateSunriseOrSunset(LONG, LAT, NOW, false, true);
+
+        // sunset = adjust_time_hack(sunset);
+        // sunrise = adjust_time_hack(sunrise);
+        
+        if (NOW > DST_START && NOW < DST_END ) {
+          sunrise += 1;
+          sunset += 1;
+          dawn += 1;
+          dusk += 1;
+        }
+        
+
+        // sun rise + set horizontals
+        cx.fillStyle = "rgba(130,130,100,1)";
+
+        cx.fillRect(NOW.getDayOfTheYear() - 2, Math.floor(sunrise * Y_SCALE), 5, 1);
+        cx.fillRect(NOW.getDayOfTheYear() - 2, Math.floor(sunset * Y_SCALE), 5, 1);
+        
+        cx.fillStyle = "rgba(150,150,150,1)";
+        
+        cx.fillRect(X * X_SCALE, Math.floor(sunrise * Y_SCALE), 12, 1);
+        cx.fillRect(X * X_SCALE, Math.floor(sunset * Y_SCALE), 12, 1);
+        
+        $('#rise').css({ 
+          top: Math.floor(sunrise * Y_SCALE) - 8
+        }).find('span').text(n_to_hhmm(sunrise));
+        
+        $('#set').css({
+           top: Math.floor(sunset * Y_SCALE) - 8 
+        }).find('span').text(n_to_hhmm(sunset));
+
+        // 
+        $('#months span#date').text(NOW.getDate()).css({ left: NOW.getMonth() * 30 + 3 });
+        $('#times span').text(n_to_hhmm(guessed_hours)).css({ top: now_minutes_pos - 4 });
+
+        // if ()
+        // DESCRIPTION[]
+        // var $status = $("span#status");
+        // 
+        // var now_n = time_to_n(NOW);
+        // var desc;
+        //         
+        // if (now_n < sunrise) {
+        //   desc = DESCRIPTION.night;
+        // } else if (now_n > sunrise && now_n < sunset) {
+        //   desc = DESCRIPTION.day;
+        // }
+        // 
+        // if (now_n < sunrise && now_n > dawn) {
+        //   desc = DESCRIPTION.dawn;
+        // }
+        
+        
+
+        // $status.text(desc);
+
+        $($('#months div').get(NOW.getMonth())).addClass('ACTIVE');
+      }
+      
+      function time_to_n (t) {
+        return t.getHours() +  (t.getMinutes() / 60)
+      }
+      
+      function n_to_time (n) {
+        return new Date(HOUR_IN_MS * n);
+      }
+      
+      function time_to_hhmm(t) {
+        var mins = t.getMinutes() + "";
+        if (mins.length == 1) { mins = "0" + mins; }
+        
+        return t.getHours() + ":" + mins;
+      }
+
+      function n_to_hhmm (n) {
+        var tmp = new Date(HOUR_IN_MS * n);
+        var mins = tmp.getMinutes() + "";
+        if (mins.length == 1) { mins = "0" + mins; }
+        
+        return tmp.getHours() + ":" + mins;
+      }
+
+    </script> 
+
+    <style type="text/css"> 
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      
+      body {
+        font-family: Georgia;
+        background: #000028;
+/*        padding: 24px 48px;*/
+        height: 100%;
+      }
+      
+      h1 {
+        font-size: 24px;
+        position: absolute;
+        top: 12px;
+        width: 100%;
+        text-align: center;
+        color: #fff;
+        font-weight: 100;
+        font-family: "Helvetica Neue";
+        letter-spacing: 2px;
+        
+      }
+      
+      h1 a {
+        text-decoration: underline;
+        display: block;
+        color: #aaa;
+        margin-top: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        
+      }
+      
+      h1 a:hover {
+        color: white !important;
+      }
+      
+      #cities {
+        font-weight: 100;
+        font-family: "Helvetica Neue";
+        letter-spacing: 3px;
+        display: none;
+        position: absolute;
+        top: 24px;
+/*        background:;*/
+        font-size: 14px;
+        margin: 48px 24px;
+        padding: 24px 24px;
+        background: rgba(0,0,0,0.8);
+        z-index: 1;
+        left: 0;
+        color: #ccc;
+        line-height: 1.8em;
+/*        word-spacing: -5px;*/
+        text-align: center;
+        
+      }
+
+      #cities span {
+        margin-right: 24px;
+        letter-spacing: 1px;
+/*        display: block;*/
+/*        float: left;*/
+        white-space: nowrap;
+/*        border-bottom: 1px solid #999;*/
+/*          padding: 0 12px 0 12px;*/
+      }
+
+      #cities span:hover {
+        color: white;
+        cursor: pointer;
+      }
+
+      
+      div#main {
+        height: 481px;
+        position: relative;
+        top: 50%;
+        left: 0px;
+        width: 370px;
+        margin: -240px auto 0;
+/*        outline: 1px solid red;*/
+      }
+      
+      canvas {
+        background: #000028;
+      }
+      
+      #times {
+        position: absolute;
+        top: 6px;
+        left: -56px;
+        color: #335;
+/*        left: -6px;*/
+        font-size: 18px;
+        margin-top: -16px;
+      }
+      
+      #times div {
+        text-align: right;
+        height: 120px;
+      }
+      
+      #times span {
+        display: block;
+        text-align: right;
+/*        right: -296px;*/
+        margin-top: 0px;
+        left: 300px;
+/*        text-shadow: 1px 1px 2px #000;*/
+        color: #ff0;
+        font-size: 18px;
+        background: rgba(0,0,40, 0.8);
+/*        border: 1px solid #111;*/
+        padding: 1px 5px 4px 5px;
+/*        font-size: 15px;*/
+        -webkit-border-radius: 2px;
+        -moz-border-radius: 2px;
+        position: absolute;
+      }
+      
+      #months {
+        position: absolute;
+        bottom: -24px;
+        color: #335;
+/*        width: 730px;*/
+        vertical-align: middle;
+        padding-left: 2px;
+/*        overflow: hidden;*/
+        height: 24px;
+/*        outline: 1px solid red;*/
+      }
+      #months div {
+/*        background: black;*/
+        height: 24px;
+        padding-top: 6px;
+        font-size: 12px;
+        letter-spacing: -1px;
+        width: 30px;
+        text-align: center;
+        float: left;
+        text-transform: uppercase;
+      }
+      
+      #months div.ACTIVE {
+        color: #ddd;
+      }
+      
+      #months span {
+        position: absolute;
+        top: 14px;
+        left: 8px;
+/*        left: 280px; */
+        display: block;
+        width: 30px;
+        color: #eee;
+        text-align: center;
+/*        font-size: 11px;*/
+      }
+      
+      #sun {
+        font-size: 18px;
+        position: absolute;
+        top: -4px;
+        right: -12px;
+        color: #888;
+        text-transform: uppercase;
+      }
+      
+      #sun div {
+        width: 80px;
+        position: absolute;
+      }
+      
+      #sun span {
+        margin: 0 4px;
+        color: #ccd;
+      }
+    </style> 
+  </head> 
+   
+  <body onload="refresh();"> 
+    
+    <h1><span id="status"></span> <span id="location">London</span> <a>Change city</a></h1>
+    
+    <div id="cities">
+    </div>
+    
+    <div id="main">
+      <canvas id="example" width="730" height="481">
+        This text is displayed if your browser does not support HTML5 Canvas.
+      </canvas>
+    
+      <div id="sun">
+        <div id="rise">
+          <span id='sunrise'></span> &uarr;
+        </div>
+        <div id="set">
+          <span id="sunset"></span> &darr;
+        </div>
+      </div>
+    
+      <div id="times">
+        <div></div>
+        <div>6:00</div>
+        <div>12:00</div>
+        <div>18:00</div>
+        <div></div>
+        <span id="time"></span>
+      </div>
+    
+      <div id="months">
+        <div>Jan</div>
+        <div>Feb</div>
+        <div>Mar</div>
+        <div>Apr</div>
+        <div>May</div>
+        <div>Jun</div>
+        <div>Jul</div>
+        <div>Aug</div>
+        <div>Sep</div>
+        <div>Oct</div>
+        <div>Nov</div>
+        <div>Dec</div>      
+        <span id="date">10</span>
+      </div>
+    </div>
+  </body> 
+</html>
