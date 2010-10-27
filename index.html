@@ -10,12 +10,9 @@
 
     <!-- script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script -->
 
-
-
-
-
-
     <script type="text/javascript">
+
+      // long, lat, timezone, 
 
       var DB = {
         "Aberdeen, Scotland": [57.9, -2.9],
@@ -51,7 +48,7 @@
         "Caracas, Venezuela ": [10.28, -67.2 ],
         "Cayenne, French Guiana ": [4.49, -52.18 ],
         "Chihuahua, Mexico ": [28.37, -106.5 ],
-        "Chongqing, China ": [29.46, 106.34],
+        // "Chongqing, China ": [29.46, 106.34],
         "Copenhagen, Denmark": [55.40, 12.34],
         "Córdoba, Argentina ": [-31.28 , -64.10 ],
         "Dakar, Senegal ": [14.40, -17.28 ],
@@ -66,10 +63,10 @@
         "Guatemala City, Guatemala ": [14.37, -90.31],
         "Guayaquil, Ecuador ": [-2.10 , -79.56],
         "Hamburg, Germany": [53.33, 10.2],
-        "Hammerfest, Norway ": [70.38, 23.38],
+        // "Hammerfest, Norway ": [70.38, 23.38],
         "Havana, Cuba": [23.8, -82.23],
         "Helsinki, Finland ": [60.10, 25.0],
-        "Hobart, Tasmania ": [-42.52, 147.19],
+        // "Hobart, Tasmania ": [-42.52, 147.19],
         "Hong Kong, China": [22.20, 114.11],
         "Iquique, Chile ": [-20.10 , -70.7 ],
         "Irkutsk, Russia ": [52.30, 104.20],
@@ -79,7 +76,7 @@
         "Kinshasa, Congo": [-4.18, 15.17],
         "Kuala Lumpur, Malaysia": [3.8, 101.42],
         "La Paz, Bolivia ": [-16.27, -68.22],
-        "Leeds, England ": [53.45, -1.30],
+        // "Leeds, England ": [53.45, -1.30],
         "Lima, Peru ": [-12.0 , -77.2 ],
         "Lisbon, Portugal": [38.44, -9.9],
         "Liverpool, England ": [53.25, -3.0 ],
@@ -89,7 +86,7 @@
         "Manchester, England ": [53.30, -2.15 ],
         "Manila, Philippines": [14.35, 120.57],
         "Marseilles, France ": [43.20, 5.20],
-        "Mazatlán, Mexico ": [23.12, -106.25 ],
+        // "Mazatlán, Mexico ": [23.12, -106.25 ],
         "Mecca, Saudi Arabia ": [21.29, 39.45],
         "Melbourne, Australia": [-37.47 , 144.58],
         "Mexico City, Mexico": [19.26, -99.7 ],
@@ -103,6 +100,7 @@
         "Nanjing (Nanking), China ": [32.3, 118.53],
         "Naples, Italy ": [40.50, 14.15],
         "New Delhi, India": [28.35, 77.12],
+        "New York City, USA": [40.47, 73.58],
         "Newcastle-on-Tyne, England ": [54.58, -1.37 ],
         "Odessa, Ukraine ": [46.27, 30.48],
         "Osaka, Japan ": [34.32, 135.30],
@@ -121,7 +119,7 @@
         "Salvador, Brazil ": [-12.56 , -38.27 ],
         "Santiago, Chile ": [-33.28, -70.45 ],
         "St. Petersburg, Russia": [59.56, 30.18],
-        "São Paulo, Brazil ": [-23.31, -46.31],
+        "Sao Paulo, Brazil ": [-23.31, -46.31],
         "Shanghai, China ": [31.10, 121.28],
         "Singapore, Singapore": [1.14, 103.55],
         "Sofia, Bulgaria ": [42.40, 23.20],
@@ -132,15 +130,25 @@
         "Tokyo, Japan": [35.40, 139.45],
         "Tripoli, Libya ": [32.57, 13.12],
         "Venice, Italy": [45.26, 12.20],
-        "Veracruz, Mexico ": [19.10, -96.10 ],
+        // "Veracruz, Mexico ": [19.10, -96.10 ],
         "Vienna, Austria": [48.14, 16.20],
         "Vladivostok, Russia ": [43.10, 132.0],
         "Warsaw, Poland": [52.14, 21.0],
         "Wellington, New Zealand ": [-41.17, 174.47],
-        "Zürich, Switzerland": [47.21, 8.31]
+        "Zurich, Switzerland": [47.21, 8.31]
       };
+      
 
-
+      var DESCRIPTION = {
+        predawn: "Dawn approaches ",
+        dawn: "Day breaks over ",
+        morning: "Morning has broken in ",
+        day: "The sun hangs over ",
+        evening: "The sun tires in ",
+        dusk: "Night descends on ",
+        night: "Darkness reigns in ",
+        twilight: "Twilight hangs over "
+      };
       
       Date.prototype.getDayOfTheYear = function() {
         var onejan = new Date(this.getFullYear(),0,1);
@@ -312,12 +320,23 @@
 
           UT = T - lngHour;
 
+          // remove me
+          UT += Math.ceil(longitude / 15);
+
           while (UT >= 24) UT -= 24.0;
           while (UT <  0)  UT += 24.0;
 
           return UT;
       }
       
+      
+      function adjust_time_hack(hours) {
+        var tmp = hours + Math.ceil(LAT / 15);
+        while (tmp >= 24) tmp -= 24.0;
+        while (tmp <  0)  tmp += 24.0;
+        
+        return tmp;
+      }
       
       var LOCATION = 'London, England';
           X = 365,
@@ -335,7 +354,7 @@
           
           LONG = DB[LOCATION][0],
           LAT = DB[LOCATION][1],
-          TODAY = new Date(),
+          NOW = new Date(),
           ROUGH_TWILIGHT_LENGTH = 0;
           
       // var CITY = geo.ll[2].city;
@@ -350,6 +369,7 @@
         });
       
         // $('#cities').hide();
+
       
         $('#cities span').click(function() {
           var city = $(this).text();
@@ -372,10 +392,10 @@
       function refresh() {
         // $('#example').height(Y * Y_SCALE).width(X * X_SCALE);
         
-        TODAY = new Date();
+        NOW = new Date();
         current_day = JAN_FIRST.getTime(),
         
-        $('h1 span#location').text(LOCATION);
+        $('h1 span#location').html(LOCATION);
         
         var example = document.getElementById('example');
         var cx = example.getContext('2d');
@@ -404,10 +424,10 @@
           }
           
           if ((current_date > DST_START) && (current_date < DST_END) ) {
-            // sunrise += 1;
-            // sunset += 1;
-            // dusk += 1;
-            // dawn += 1;  
+            sunrise += 1;
+            sunset += 1;
+            dusk += 1;
+            dawn += 1;
           }
           
           cx.fillStyle = "rgb(240,240,255)";
@@ -422,93 +442,106 @@
             // previous_state bug code here
           }
           
-          // dawn twilight
-          if (sunrise && dawn) {
-            var dawn_length = (sunrise - dawn) * Y_SCALE,
-                dawn_pos = dawn * Y_SCALE,          
-                ROUGH_TWILIGHT_LENGTH = dawn_length;
-      
-            var dawngrad = cx.createLinearGradient(0, dawn_pos, 0, dawn_length + dawn_pos);  
-                dawngrad.addColorStop(0, '#000028');  
-                dawngrad.addColorStop(1.0, 'rgb(240,240,255)');  
+          function draw_dawn () {          // dawn twilight
+            if (sunrise && dawn) {
+              var dawn_length = (sunrise - dawn) * Y_SCALE,
+                  dawn_pos = dawn * Y_SCALE,          
+                  ROUGH_TWILIGHT_LENGTH = dawn_length;
+    
+              var dawngrad = cx.createLinearGradient(0, dawn_pos, 0, dawn_length + dawn_pos);  
+                  dawngrad.addColorStop(0, '#000028');  
+                  dawngrad.addColorStop(1.0, 'rgb(240,240,255)');  
 
-            cx.fillStyle = dawngrad;
-            cx.fillRect(x * X_SCALE, dawn_pos, X_SCALE, dawn_length + 1);
+              cx.fillStyle = dawngrad;
+              cx.fillRect(x * X_SCALE, dawn_pos, X_SCALE, dawn_length + 1);
+            }
           }
           
+          function draw_dusk (cx) {
+            // dusk twilight
+            if (sunset && dusk) {
+              var dusk_length = (dusk - sunset) * Y_SCALE,
+                  dusk_pos = dusk * Y_SCALE;
           
-          // dusk twilight
-          if (sunset && dusk) {
-            var dusk_length = (dusk - sunset) * Y_SCALE,
-                dusk_pos = dusk * Y_SCALE;
-          
-            var duskgrad = cx.createLinearGradient(0, sunset * Y_SCALE, 0, dusk_pos);  
-                duskgrad.addColorStop(1, '#000028');  
-                duskgrad.addColorStop(0, 'rgb(240,240,255)');  
+              var duskgrad = cx.createLinearGradient(0, sunset * Y_SCALE, 0, dusk_pos);  
+                  duskgrad.addColorStop(1, '#000028');  
+                  duskgrad.addColorStop(0, 'rgb(240,240,255)');  
 
-            cx.fillStyle = duskgrad;
-            cx.fillRect(x * X_SCALE, (sunset * Y_SCALE) - 1, X_SCALE, dusk_length);
+              cx.fillStyle = duskgrad;
+              cx.fillRect(x * X_SCALE, (sunset * Y_SCALE) - 1, X_SCALE, dusk_length);
+            }
           }
           
-          // winter permi-darkness
-          if (dawn && dusk && ! sunset && ! sunrise) {
-            var dawn_pos = dawn * Y_SCALE,
-                dusk_pos = dusk * Y_SCALE;
-          
-            var grad = cx.createLinearGradient(0, dawn_pos, 0, dusk_pos);  
-                grad.addColorStop(0, '#000028');  
-                grad.addColorStop(0.3, 'rgb(100,100,110)');  
-                grad.addColorStop(0.7, 'rgb(100,100,110)');  
-                grad.addColorStop(1, '#000028');
+          function draw_permidarkness (cx) {
+            // winter permi-darkness
+            if (dawn && dusk && ! sunset && ! sunrise) {
+              var dawn_pos = dawn * Y_SCALE,
+                  dusk_pos = dusk * Y_SCALE;
 
-            cx.fillStyle = grad;
-            cx.fillRect(x * X_SCALE, dawn_pos, X_SCALE, dusk_pos);
-          } 
-
-          // summer night twilight
-          if ((sunrise || sunset) && ! dusk && ! dawn) {
-            if (sunrise) {
-              var dawn_length = sunrise * Y_SCALE;
-
-              var grad = cx.createLinearGradient(0, 0, 0, dawn_length);  
+              var grad = cx.createLinearGradient(0, dawn_pos, 0, dusk_pos);  
                   grad.addColorStop(0, '#000028');  
-                  grad.addColorStop(1.0, 'rgb(240,240,255)');  
+                  grad.addColorStop(0.3, 'rgb(100,100,110)');  
+                  grad.addColorStop(0.7, 'rgb(100,100,110)');  
+                  grad.addColorStop(1, '#000028');
 
               cx.fillStyle = grad;
-              cx.fillRect(x * X_SCALE, 0, X_SCALE, dawn_length + 1);
-            }
-            if (sunset) {
-              var dusk_pos = sunset * Y_SCALE;
-
-              var grad = cx.createLinearGradient(0, dusk_pos, 0,  Y );  
-                  grad.addColorStop(1.0, '#000028');  
-                  grad.addColorStop(0, 'rgb(240,240,255)');  
-
-              cx.fillStyle = grad;
-              cx.fillRect(x * X_SCALE, dusk_pos - 1, X_SCALE, Y );
+              cx.fillRect(x * X_SCALE, dawn_pos, X_SCALE, dusk_pos);
             }
           }
+          
+          function draw_permitwilight(cx){
+            // summer night twilight
+            if ((sunrise || sunset) && ! dusk && ! dawn) {
+              if (sunrise) {
+                var dawn_length = sunrise * Y_SCALE;
+
+                var grad = cx.createLinearGradient(0, 0, 0, dawn_length);  
+                    grad.addColorStop(0, '#000028');  
+                    grad.addColorStop(1.0, 'rgb(240,240,255)');  
+
+                cx.fillStyle = grad;
+                cx.fillRect(x * X_SCALE, 0, X_SCALE, dawn_length + 1);
+              }
+              if (sunset) {
+                var dusk_pos = sunset * Y_SCALE;
+
+                var grad = cx.createLinearGradient(0, dusk_pos, 0,  Y);  
+                    grad.addColorStop(1.0, '#000028');  
+                    grad.addColorStop(0, 'rgb(240,240,255)');  
+
+                cx.fillStyle = grad;
+                cx.fillRect(x * X_SCALE, dusk_pos - 1, X_SCALE, Y);
+              }
+            }
+          }
+          
+          if (LONG < 58) {
+            draw_dawn(cx);
+            draw_dusk(cx);
+          }
+          draw_permidarkness(cx);
+          draw_permitwilight(cx);
+
           
           current_day += DAY_IN_MS;
         }
         
         // today line
-        cx.fillStyle = "rgba(150,150,0, 0.4)";
-        cx.fillRect(X_SCALE * TODAY.getDayOfTheYear(), 1, 1, Y * Y_SCALE);
+        cx.fillStyle = "rgba(150, 150, 0, 0.4)";
+        cx.fillRect(X_SCALE * NOW.getDayOfTheYear(), 1, 1, Y * Y_SCALE);
                 
         // time gridlines
         cx.fillStyle = "rgba(180,180,180,0.2)";
-        
         for (var i = 0; i < 25; ++i) {
           if (i % 6 == 0) { 
             cx.fillRect(0, i * Y_SCALE, X * X_SCALE, 1);
           }
         }
         
-
-
+        var guessed_hours = adjust_time_hack(NOW.getMinuteOfTheDay() / 60);
         
-        var now_minutes_pos = Math.floor(TODAY.getMinuteOfTheDay() / 60 * Y_SCALE);
+        var now_minutes_pos = Math.floor(guessed_hours * Y_SCALE);
+        // var now_minutes_pos = Math.floor(NOW.getMinuteOfTheDay() / 60 * Y_SCALE);
 
         // sun right aligned
         cx.fillStyle = "rgba(255,255,0,1)";
@@ -517,24 +550,32 @@
         // the sun square
         cx.fillStyle = "rgba(0,0,0,0.5)";
         cx.fillRect(
-          X_SCALE * TODAY.getDayOfTheYear() - 2, now_minutes_pos - 2, 5, 5); 
+          X_SCALE * NOW.getDayOfTheYear() - 2, now_minutes_pos - 2, 5, 5); 
         cx.fillStyle = "rgb(255,255,0)";
-        cx.fillRect(X_SCALE * TODAY.getDayOfTheYear() - 1, now_minutes_pos - 1, 3, 3);
+        cx.fillRect(X_SCALE * NOW.getDayOfTheYear() - 1, now_minutes_pos - 1, 3, 3);
         
         
-        var sunrise = CalculateSunriseOrSunset(LONG, LAT, TODAY, true);
-        var sunset = CalculateSunriseOrSunset(LONG, LAT, TODAY, false);
+        var sunrise = CalculateSunriseOrSunset(LONG, LAT, NOW, true);
+        var sunset = CalculateSunriseOrSunset(LONG, LAT, NOW, false);
+        var dawn = CalculateSunriseOrSunset(LONG, LAT, NOW, true, true);
+        var dusk = CalculateSunriseOrSunset(LONG, LAT, NOW, false, true);
+
+        // sunset = adjust_time_hack(sunset);
+        // sunrise = adjust_time_hack(sunrise);
         
-        if (TODAY > DST_START && TODAY < DST_END ) {
+        if (NOW > DST_START && NOW < DST_END ) {
           sunrise += 1;
           sunset += 1;
+          dawn += 1;
+          dusk += 1;
         }
+        
 
         // sun rise + set horizontals
         cx.fillStyle = "rgba(130,130,100,1)";
 
-        cx.fillRect(TODAY.getDayOfTheYear() - 2, Math.floor(sunrise * Y_SCALE), 5, 1);
-        cx.fillRect(TODAY.getDayOfTheYear() - 2, Math.floor(sunset * Y_SCALE), 5, 1);
+        cx.fillRect(NOW.getDayOfTheYear() - 2, Math.floor(sunrise * Y_SCALE), 5, 1);
+        cx.fillRect(NOW.getDayOfTheYear() - 2, Math.floor(sunset * Y_SCALE), 5, 1);
         
         cx.fillStyle = "rgba(150,150,150,1)";
         
@@ -543,19 +584,47 @@
         
         $('#rise').css({ 
           top: Math.floor(sunrise * Y_SCALE) - 8
-        }).find('span').text(n_to_time(sunrise));
+        }).find('span').text(n_to_hhmm(sunrise));
         
         $('#set').css({
            top: Math.floor(sunset * Y_SCALE) - 8 
-        }).find('span').text(n_to_time(sunset));
+        }).find('span').text(n_to_hhmm(sunset));
 
-        $('#months span#date').text(TODAY.getDate()).css({ left: TODAY.getMonth() * 30 + 4 });
+        // 
+        $('#months span#date').text(NOW.getDate()).css({ left: NOW.getMonth() * 30 + 3 });
+        $('#times span').text(n_to_hhmm(guessed_hours)).css({ top: now_minutes_pos - 4 });
 
-        $('#times span').text(time_to_hhmm(TODAY)).css({ top: now_minutes_pos - 4 });
+        // if ()
+        // DESCRIPTION[]
+        // var $status = $("span#status");
+        // 
+        // var now_n = time_to_n(NOW);
+        // var desc;
+        //         
+        // if (now_n < sunrise) {
+        //   desc = DESCRIPTION.night;
+        // } else if (now_n > sunrise && now_n < sunset) {
+        //   desc = DESCRIPTION.day;
+        // }
+        // 
+        // if (now_n < sunrise && now_n > dawn) {
+        //   desc = DESCRIPTION.dawn;
+        // }
+        
+        
 
-        $($('#months div').get(TODAY.getMonth())).addClass('ACTIVE');
+        // $status.text(desc);
+
+        $($('#months div').get(NOW.getMonth())).addClass('ACTIVE');
       }
       
+      function time_to_n (t) {
+        return t.getHours() +  (t.getMinutes() / 60)
+      }
+      
+      function n_to_time (n) {
+        return new Date(HOUR_IN_MS * n);
+      }
       
       function time_to_hhmm(t) {
         var mins = t.getMinutes() + "";
@@ -564,7 +633,7 @@
         return t.getHours() + ":" + mins;
       }
 
-      function n_to_time (n) {
+      function n_to_hhmm (n) {
         var tmp = new Date(HOUR_IN_MS * n);
         var mins = tmp.getMinutes() + "";
         if (mins.length == 1) { mins = "0" + mins; }
@@ -636,10 +705,11 @@
 
       #cities span {
         margin-right: 24px;
+        letter-spacing: 1px;
 /*        display: block;*/
 /*        float: left;*/
         white-space: nowrap;
-        border-bottom: 1px solid #999;
+/*        border-bottom: 1px solid #999;*/
 /*          padding: 0 12px 0 12px;*/
       }
 
@@ -665,12 +735,12 @@
       
       #times {
         position: absolute;
-        top: 8px;
-        left: -48px;
-        color: #556;
+        top: 6px;
+        left: -56px;
+        color: #335;
 /*        left: -6px;*/
-        font-size: 14px;
-        margin-top: -15px;
+        font-size: 18px;
+        margin-top: -16px;
       }
       
       #times div {
@@ -681,13 +751,18 @@
       #times span {
         display: block;
         text-align: right;
-        right: -296px;
+/*        right: -296px;*/
+        margin-top: 0px;
+        left: 300px;
 /*        text-shadow: 1px 1px 2px #000;*/
         color: #ff0;
+        font-size: 18px;
         background: rgba(0,0,40, 0.8);
 /*        border: 1px solid #111;*/
-        padding: 1px 2px 2px 3px;
+        padding: 1px 5px 4px 5px;
 /*        font-size: 15px;*/
+        -webkit-border-radius: 2px;
+        -moz-border-radius: 2px;
         position: absolute;
       }
       
@@ -720,7 +795,8 @@
       
       #months span {
         position: absolute;
-        top: 12px;
+        top: 14px;
+        left: 8px;
 /*        left: 280px; */
         display: block;
         width: 30px;
@@ -730,9 +806,9 @@
       }
       
       #sun {
-        font-size: 14px;
+        font-size: 18px;
         position: absolute;
-        top: 0px;
+        top: -4px;
         right: -12px;
         color: #888;
         text-transform: uppercase;
@@ -752,7 +828,7 @@
    
   <body onload="refresh();"> 
     
-    <h1>Darkness reigns in <span id="location">London</span> <a>Change city</a></h1>
+    <h1><span id="status"></span> <span id="location">London</span> <a>Change city</a></h1>
     
     <div id="cities">
     </div>
