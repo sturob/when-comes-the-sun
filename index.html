@@ -661,21 +661,23 @@
       h1 {
         font-size: 24px;
         position: absolute;
-        top: 12px;
-        width: 100%;
+        top: 24px;
+        width: 460px;
+        left: 50%;
+        margin-left: -235px;
         text-align: center;
         color: #fff;
         font-weight: 100;
         font-family: "Helvetica Neue";
         letter-spacing: 2px;
-        
+        z-index: 10;
       }
       
       h1 a {
         text-decoration: underline;
         display: block;
         color: #aaa;
-        margin-top: 4px;
+        margin-top: 8px;
         font-size: 12px;
         cursor: pointer;
         
@@ -729,12 +731,12 @@
         left: 0px;
         width: 370px;
         margin: -240px auto 0;
-/*        outline: 1px solid red;*/
       }
       
       canvas {
         background: #000028;
       }
+      
       
       #times {
         position: absolute;
@@ -744,6 +746,8 @@
 /*        left: -6px;*/
         font-size: 18px;
         margin-top: -16px;
+        height: 400px;
+        overflow: hidden;
       }
       
       #times div {
@@ -826,6 +830,23 @@
         margin: 0 4px;
         color: #ccd;
       }
+      
+      
+      #about {
+        z-index: -1;
+        font-family: Helvetica Neue;
+        font-weight: 300;
+        position: absolute;
+        bottom: 12px;
+        width: 100%;
+        text-align: center;
+        color: #446;
+        font-size: 10px;
+      }
+      
+      a {
+        color: #446;
+      }
     </style> 
   </head> 
    
@@ -874,6 +895,10 @@
         <div>Dec</div>      
         <span id="date">10</span>
       </div>
+    </div>
+    
+    <div id="about">
+      &copy; <a href="http://sturob.com/">Stuart Robinson</a> 2010
     </div>
   </body> 
 </html>
