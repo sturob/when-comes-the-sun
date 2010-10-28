@@ -11,9 +11,105 @@
 
     <script type="text/javascript">
 
-      // long, lat, timezone, 
+      /**
+       * Cookie plugin
+       *
+       * Copyright (c) 2006 Klaus Hartl (stilbuero.de)
+       * Dual licensed under the MIT and GPL licenses:
+       * http://www.opensource.org/licenses/mit-license.php
+       * http://www.gnu.org/licenses/gpl.html
+       *
+       */
+
+      /**
+       * Create a cookie with the given name and value and other optional parameters.
+       *
+       * @example $.cookie('the_cookie', 'the_value');
+       * @desc Set the value of a cookie.
+       * @example $.cookie('the_cookie', 'the_value', { expires: 7, path: '/', domain: 'jquery.com', secure: true });
+       * @desc Create a cookie with all available options.
+       * @example $.cookie('the_cookie', 'the_value');
+       * @desc Create a session cookie.
+       * @example $.cookie('the_cookie', null);
+       * @desc Delete a cookie by passing null as value. Keep in mind that you have to use the same path and domain
+       *       used when the cookie was set.
+       *
+       * @param String name The name of the cookie.
+       * @param String value The value of the cookie.
+       * @param Object options An object literal containing key/value pairs to provide optional cookie attributes.
+       * @option Number|Date expires Either an integer specifying the expiration date from now on in days or a Date object.
+       *                             If a negative value is specified (e.g. a date in the past), the cookie will be deleted.
+       *                             If set to null or omitted, the cookie will be a session cookie and will not be retained
+       *                             when the the browser exits.
+       * @option String path The value of the path atribute of the cookie (default: path of page that created the cookie).
+       * @option String domain The value of the domain attribute of the cookie (default: domain of page that created the cookie).
+       * @option Boolean secure If true, the secure attribute of the cookie will be set and the cookie transmission will
+       *                        require a secure protocol (like HTTPS).
+       * @type undefined
+       *
+       * @name $.cookie
+       * @cat Plugins/Cookie
+       * @author Klaus Hartl/klaus.hartl@stilbuero.de
+       */
+
+      /**
+       * Get the value of a cookie with the given name.
+       *
+       * @example $.cookie('the_cookie');
+       * @desc Get the value of a cookie.
+       *
+       * @param String name The name of the cookie.
+       * @return The value of the cookie.
+       * @type String
+       *
+       * @name $.cookie
+       * @cat Plugins/Cookie
+       * @author Klaus Hartl/klaus.hartl@stilbuero.de
+       */
+      jQuery.cookie = function(name, value, options) {
+          if (typeof value != 'undefined') { // name and value given, set cookie
+              options = options || {};
+              if (value === null) {
+                  value = '';
+                  options.expires = -1;
+              }
+              var expires = '';
+              if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
+                  var date;
+                  if (typeof options.expires == 'number') {
+                      date = new Date();
+                      date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
+                  } else {
+                      date = options.expires;
+                  }
+                  expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
+              }
+              // CAUTION: Needed to parenthesize options.path and options.domain
+              // in the following expressions, otherwise they evaluate to undefined
+              // in the packed version for some reason...
+              var path = options.path ? '; path=' + (options.path) : '';
+              var domain = options.domain ? '; domain=' + (options.domain) : '';
+              var secure = options.secure ? '; secure' : '';
+              document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
+          } else { // only name given, get cookie
+              var cookieValue = null;
+              if (document.cookie && document.cookie != '') {
+                  var cookies = document.cookie.split(';');
+                  for (var i = 0; i < cookies.length; i++) {
+                      var cookie = jQuery.trim(cookies[i]);
+                      // Does this cookie string begin with the name we want?
+                      if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                          break;
+                      }
+                  }
+              }
+              return cookieValue;
+          }
+      };
 
       var DB = {
+
         "Aberdeen, Scotland": [57.9, -2.9],
         "Adelaide, Australia ": [-34.55 , 138.36],
         "Algiers, Algeria": [36.0, 3.0],
@@ -26,7 +122,7 @@
         "Barcelona, Spain": [41.23, 2.9],
         "Beijing, China": [39.55, 116.25],
         // "Belém, Brazil ": [-1.28, -48.29],
-        "Belfast, Northern Ireland ": [54.37, -5.56],
+        "Belfast, Northern Ireland": [54.37, -5.56],
         "Belgrade, Serbia ": [44.52, 20.32],
         "Berlin, Germany": [52.30, 13.25],
         "Birmingham, England ": [52.25, -1.55 ],
@@ -898,5 +994,20 @@
     <div id="about">
       &copy; <a href="http://sturob.com/">Stuart Robinson</a> 2010
     </div>
+    
+    <script type="text/javascript">
+    var clicky = { log: function(){ return; }, goal: function(){ return; }};
+    var clicky_site_id = 266178;
+    (function() {
+      var s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.async = true;
+      s.src = ( document.location.protocol == 'https:' ? 'https://static.getclicky.com/js' : 'http://static.getclicky.com/js' );
+      ( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
+    })();
+    </script>
+    <a title="Real Time Web Analytics" href="http://getclicky.com/266178"></a>
+    <noscript><p><img alt="Clicky" width="1" height="1" src="http://in.getclicky.com/266178ns.gif" /></p></noscript>
+    
   </body> 
 </html>
