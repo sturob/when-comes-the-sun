@@ -2,56 +2,25 @@
   <head> 
     <title>When Comes the Sun</title> 
 
-    <meta name="viewport" content="user-scalable=no, width=device-width" />
+    <!-- <meta name="viewport" content="user-scalable=no, width=device-width" /> -->
 
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js">    
     </script>
 
-    <!-- script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script -->
+    <!-- 
+      geo detect
+      fix southern hemisphere timezones
+      tidy up arabia
+      -
+      add cities from analytics- dubai, jerusalum etc
+      fix coordinates
+      canvas for IE
+    -->
+
+    <!--  <script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script> -->
+    
 
     <script type="text/javascript">
-
-      /**
-       * Cookie plugin
-       *
-       * Copyright (c) 2006 Klaus Hartl (stilbuero.de)
-       * Dual licensed under the MIT and GPL licenses:
-       * http://www.opensource.org/licenses/mit-license.php
-       * http://www.gnu.org/licenses/gpl.html
-       *
-       */
-
-      /**
-       * Create a cookie with the given name and value and other optional parameters.
-       *
-       * @example $.cookie('the_cookie', 'the_value');
-       * @desc Set the value of a cookie.
-       * @example $.cookie('the_cookie', 'the_value', { expires: 7, path: '/', domain: 'jquery.com', secure: true });
-       * @desc Create a cookie with all available options.
-       * @example $.cookie('the_cookie', 'the_value');
-       * @desc Create a session cookie.
-       * @example $.cookie('the_cookie', null);
-       * @desc Delete a cookie by passing null as value. Keep in mind that you have to use the same path and domain
-       *       used when the cookie was set.
-       *
-       * @param String name The name of the cookie.
-       * @param String value The value of the cookie.
-       * @param Object options An object literal containing key/value pairs to provide optional cookie attributes.
-       * @option Number|Date expires Either an integer specifying the expiration date from now on in days or a Date object.
-       *                             If a negative value is specified (e.g. a date in the past), the cookie will be deleted.
-       *                             If set to null or omitted, the cookie will be a session cookie and will not be retained
-       *                             when the the browser exits.
-       * @option String path The value of the path atribute of the cookie (default: path of page that created the cookie).
-       * @option String domain The value of the domain attribute of the cookie (default: domain of page that created the cookie).
-       * @option Boolean secure If true, the secure attribute of the cookie will be set and the cookie transmission will
-       *                        require a secure protocol (like HTTPS).
-       * @type undefined
-       *
-       * @name $.cookie
-       * @cat Plugins/Cookie
-       * @author Klaus Hartl/klaus.hartl@stilbuero.de
-       */
-
       /**
        * Get the value of a cookie with the given name.
        *
@@ -182,7 +151,7 @@
         "Naples, Italy":                [  40.50,   14.15,  CET,  1 ], 
         "Oslo, Norway":                 [  59.57,   10.42,  CET,  1 ],
         "Paris, France":                [  48.48,    2.20,  CET,  1 ],
-        "Reykjavik, Iceland":           [  64.40,  -21.58,  GMT,  0 ],
+        "Reykjavik, Iceland":           [  64.40,  -21.58,  GMT ],
         "Sofia, Bulgaria":              [  42.40,   23.20,  EET,  1 ],
         "Prague, Czech Republic":       [  50.50,   14.26,  CET,  1 ],
         "Rome, Italy":                  [  41.54,   12.27,  CET,  1 ],
@@ -193,6 +162,29 @@
         "Vladivostok, Russia":          [  43.10,  132.00,   10,  1 ],
         "Warsaw, Poland":               [  52.14,   21.00,  CET,  1 ],
         "Zurich, Switzerland":          [  47.21,    8.31,  CET,  1 ],
+
+        "North America": false,
+        
+        "Atlanta, USA":                 [  33.45,   84.23,  EST, 10 ],
+        "Boston, USA":                  [  42.21,   71.50,  EST, 10 ], 
+        "Calgary, Canada":              [  51.10,  114.10,  MST, 10 ],
+        "Chicago, USA":                 [  41.50,   87.37,  CST, 10 ], 
+        "Columbus, USA":                [  34.00, 	81.20,  EST, 10 ],
+        "Dallas, USA":                  [  32.46,	  96.46,  CST, 10 ],
+        "Detroit, USA":                 [  42.20,	  83.30,  EST, 10 ],
+        "Houston, USA":                 [  29.45,	  95.21,  CST, 10 ],
+        "Los Angeles, USA":             [  34.30,	 118.15,  PST, 10 ],
+        "Mexico City, Mexico":          [  19.26,  -99.70,  CST,  6 ],
+        "New York City, USA":           [  40.47,   73.58,  EST, 10 ],
+        "New Orleans, USA":             [  29.57,	  90.40,  CST, 10 ],
+        "Philadelphia, USA":            [  39.57,	  75.10,  EST, 10 ],
+        "Phoenix, USA":                 [  33.29,	 112.40,  MST,  0 ],
+        "San Diego, USA":               [  32.42,	 117.10,  PST, 10 ],
+        "San Francisco, USA":           [  37.47,	 122.26,  PST, 10 ],
+        "Seattle, USA":                 [  47.37,	 122.20,  PST, 10 ],
+        "Toronto, Canada":              [  43.40,   79.24,  EST, 10 ],
+        "Vancouver, Canada":            [  49.13,  123.06,  PST, 10 ],
+        
 
         "Africa": false,
         
@@ -207,7 +199,9 @@
         "Lagos, Nigeria":               [   6.27,    3.23,  WAT ],
         "Nairobi, Kenya":               [  -1.25,   36.55,  EAT ],
         "Tripoli, Libya":               [  32.57,   13.12,  EET ],
-                                                               
+                        
+                        
+        "Middle East": false,
         "Ankara, Turkey":               [  39.55,   32.55,  EET,  1 ],
         "Istanbul, Turkey":             [  41.01,   28.58,  EET,  1 ],
         "Mecca, Saudi Arabia":          [  21.29,   39.45,  AST,  0 ],
@@ -264,35 +258,14 @@
         "Kingston, Jamaica":            [  17.59,  -76.49,   -5 ],
         "La Paz, Bolivia":              [ -16.27,  -68.22,   -4 ],
         "Lima, Peru":                   [ -12.00,  -77.20,   -5 ],
-        "Mexico City, Mexico":          [  19.26,  -99.70,  CST,  6 ],
         "Montevideo, Uruguay":          [ -34.53,  -56.10,   -3,  7 ],
         "Panama City, Panama":          [   8.58,  -79.32,  EST ],
         "Paramaribo, Suriname":         [   5.45,  -55.15,   -3 ],
         "Rio de Janeiro, Brazil":       [ -22.57,  -43.12, BRST,  8 ],
         "Salvador, Brazil":             [ -12.56 , -38.27, BRST,  0 ],
         "Santiago, Chile":              [ -33.28,  -70.45,   -4,  9 ],
-        "Sao Paulo, Brazil":            [ -23.31,  -46.31, BRST,  8 ],
-
-        "North America": false,
+        "Sao Paulo, Brazil":            [ -23.31,  -46.31, BRST,  8 ]
         
-        "Atlanta, USA":                 [  33.45,   84.23,  EST, 10 ],
-        "Boston, USA":                  [  42.21,   71.50,  EST, 10 ], 
-        "Calgary, Canada":              [  51.10,  114.10,  MST, 10 ],
-        "Chicago, USA":                 [  41.50,   87.37,  CST, 10 ], 
-        "Columbus, USA":                [  34.00, 	81.20,  EST, 10 ],
-        "Dallas, USA":                  [  32.46,	  96.46,  CST, 10 ],
-        "Detroit, USA":                 [  42.20,	  83.30,  EST, 10 ],
-        "Houston, USA":                 [  29.45,	  95.21,  CST, 10 ],
-        "Los Angeles, USA":             [  34.30,	 118.15,  PST, 10 ],
-        "New York City, USA":           [  40.47,   73.58,  EST, 10 ],
-        "New Orleans, USA":             [  29.57,	  90.40,  CST, 10 ],
-        "Philadelphia, USA":            [  39.57,	  75.10,  EST, 10 ],
-        "Phoenix, USA":                 [  33.29,	 112.40,  MST,  0 ],
-        "San Diego, USA":               [  32.42,	 117.10,  PST, 10 ],
-        "San Francisco, USA":           [  37.47,	 122.26,  PST, 10 ],
-        "Seattle, USA":                 [  47.37,	 122.20,  PST, 10 ],
-        "Toronto, Canada":              [  43.40,   79.24,  EST, 10 ],
-        "Vancouver, Canada":            [  49.13,  123.06,  PST, 10 ]
       };
 
       var DESCRIPTION = {
@@ -474,10 +447,10 @@
 
           // Adjust back to UTC.
 
-          UT = T - lngHour;
+          // we want local time
+          UT = T; // - lngHour;
 
-          // remove me
-          UT += Math.ceil(longitude / 15);
+          // UT += Math.ceil(longitude / 15);
           
           // UT -= DB[LOCATION][2];
 
@@ -500,7 +473,7 @@
       
       
       
-      var LOCATION = 'London, England',
+      var LOCATION = $.cookie('CITY') || 'London, England',
           X = 365,
           Y = 24,
           X_SCALE = 1,
@@ -522,7 +495,7 @@
           if (ll) {
             $('#cities').append("<span>" + city + "</span> ");
           } else {
-            $('#cities').append('<h2>' + city + '</h2>');
+            $('#cities').append('<hr><h2>' + city + '</h2>');
           }
         });
       
@@ -531,6 +504,7 @@
       
         $('#cities span').click(function() {
           var city = $(this).text();
+          $.cookie('CITY', city);
           LOCATION = city;
           LONG = DB[city][0];
           LAT = DB[city][1];
@@ -686,11 +660,10 @@
           if (LONG < 58) {
             draw_dawn(cx);
             draw_dusk(cx);
-          }
-          
-          draw_permidarkness(cx);
-          draw_permitwilight(cx);
 
+            draw_permidarkness(cx);
+            draw_permitwilight(cx);
+          }
           
           current_day += DAY_IN_MS;
         }
@@ -725,8 +698,7 @@
 
         // the sun square
         cx.fillStyle = "rgba(0,0,0,0.5)";
-        cx.fillRect(
-          X_SCALE * NOW.getDayOfTheYear() - 2, now_minutes_pos - 2, 5, 5); 
+        cx.fillRect(X_SCALE * NOW.getDayOfTheYear() - 2, now_minutes_pos - 2, 5, 5); 
         cx.fillStyle = "rgb(255,255,0)";
         cx.fillRect(X_SCALE * NOW.getDayOfTheYear() - 1, now_minutes_pos - 1, 3, 3);
         
@@ -740,8 +712,8 @@
         // sun rise + set horizontals
         cx.fillStyle = "rgba(130,130,100,1)";
 
-        cx.fillRect(NOW.getDayOfTheYear() - 2, Math.floor(sunrise * Y_SCALE), 5, 1);
-        cx.fillRect(NOW.getDayOfTheYear() - 2, Math.floor(sunset * Y_SCALE), 5, 1);
+        cx.fillRect(NOW.getDayOfTheYear() - 5, Math.floor(sunrise * Y_SCALE), 12, 1);
+        cx.fillRect(NOW.getDayOfTheYear() - 5, Math.floor(sunset * Y_SCALE), 12, 1);
         
         cx.fillStyle = "rgba(150,150,150,1)";
         
@@ -803,8 +775,10 @@
         var both = n.toString().split('.');
         var mins = "0." + (both[1] || 0); // to denominator
         mins *= 60; // to minutes
+        mins = Math.floor(mins);
         mins += ""; // to string
-        return both[0] + ":" + Math.floor(mins.length > 1 ? mins : "0" + mins)
+
+        return both[0] + ":" + ((mins.length == 2) ? mins : "0" + mins);
       }
 
     </script> 
@@ -841,8 +815,8 @@
       h1 a {
         text-decoration: underline;
         display: block;
-        color: #aaa;
-        margin-top: 8px;
+        color: #888;
+        margin-top: 2px;
         font-size: 12px;
         cursor: pointer;
         
@@ -861,7 +835,7 @@
         top: 24px;
 /*        background:;*/
         font-size: 14px;
-        margin: 48px 24px;
+        margin: 24px 24px;
         padding: 24px 24px;
         background: rgba(0,0,0,0.8);
         z-index: 1;
@@ -874,8 +848,18 @@
       }
 
       #cities h2 {
+        display: inline;
         font-size: 12px;
         margin-top: 6px;
+        margin-right: 16px;
+      }
+
+      hr {
+        display: block;
+        height: 8px;
+        visibility: hidden;
+/*        width: 100%;*/
+/*        background: red;*/
       }
 
       #cities span {
@@ -912,9 +896,9 @@
       
       #times {
         position: absolute;
-        top: 6px;
+        top: 5px;
         left: -56px;
-        color: #335;
+        color: #446;
 /*        left: -6px;*/
         font-size: 18px;
         margin-top: -16px;
@@ -931,7 +915,7 @@
         display: block;
         text-align: right;
 /*        right: -296px;*/
-        margin-top: 0px;
+        margin-top: 2px;
         left: 300px;
 /*        text-shadow: 1px 1px 2px #000;*/
         color: #ff0;
@@ -948,7 +932,7 @@
       #months {
         position: absolute;
         bottom: -24px;
-        color: #335;
+        color: #446;
 /*        width: 730px;*/
         vertical-align: middle;
         padding-left: 2px;
@@ -995,6 +979,7 @@
       
       #sun div {
         width: 80px;
+/*        left: -10px;*/
         position: absolute;
       }
       
@@ -1004,7 +989,9 @@
       }
 
       #sun strong {
+        display: none;
         font-weight: normal;
+        font-size: 12px;
         color: #bbc;
 /*        text-decoration: line-through;*/
       }      
@@ -1036,7 +1023,7 @@
     
     <div id="main">
       <canvas id="example" width="730" height="481">
-        This text is displayed if your browser does not support HTML5 Canvas.
+        Sorry, your browser does not support HTML5 Canvas.
       </canvas>
     
       <div id="sun">
