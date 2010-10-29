@@ -107,132 +107,168 @@
               return cookieValue;
           }
       };
+      
+      
+      var SUNTIME = [
+        [], // no summertime
+        [ "28 March", "31 October" ], // europe
+        [ "22 March 2010", "22 September" ], // iran
+        [ "3 October", "4 April"], // australias
+        [ "26 September", "4 April"], // nz
+        [ "31 October", "14 March"], // cuba
+        [ "31 October", "4 April"], // mexico
+        [ "3 October", "14 March"], // uruguay
+        [ "17 October", "21 February" ],  // brazil
+        [ "4 April", "10 October"],  // chile
+        ["14 March", "7 November"]
+      ];
+      
+      var CST = -6,
+          EST = -5,
+          BRST = -3,
+          ART  = -3,
+          GMT  = 0,
+          CET  = 1,   // central europe
+          WAT = 1,    // west afr
+          EET  = 2,   // east europe
+          SAST = 2,   // s africa
+          EAT = 3,
+          MSD = 3,    // moscow
+          AST = 3,    // arabia
+          IRT = 3.5,  // iran
+          IST  = 5.5, // india
+          CNST  = 8,   // china
+          WST = 8,  // west aus
+          JST = 9,  // japan
+          ACST = 9.5, // aus central
+          AEST = 10,  // aus eastern
+          NZST = 12;
+          
 
       var DB = {
+        // long, lat, time_offset, summerzone
+        "Amsterdam, Netherlands":       [  52.22,    4.53,  CET,  1 ],
+        "Athens, Greece":               [  37.58,   23.43,  EET,  1 ],
+        "Barcelona, Spain":             [  41.23,    2.90,  CET,  1 ],
+        "Belfast, Northern Ireland":    [  54.37,   -5.56,  GMT,  1 ],
+        "Belgrade, Serbia":             [  44.52,   20.32,  CET,  1 ],
+        "Birmingham, England":          [  52.25,   -1.55,  GMT,  1 ],
+        "Brussels, Belgium":            [  50.52,    4.22,  CET,  1 ],
+        "Bucharest, Romania":           [  44.25,   26.70,  EET,  1 ],
+        "Budapest, Hungary":            [  47.30,   19.50,  CET,  1 ],
+        "Copenhagen, Denmark":          [  55.40,   12.34,  CET,  1 ],
+        "Dublin, Ireland":              [  53.20,   -6.15,  GMT,  1 ],
+        "Edinburgh, Scotland":          [  55.55,   -3.10,  GMT,  1 ],
+        "Frankfurt, Germany":           [   50.7,    8.41,  CET,  1 ],
+        "Glasgow, Scotland":            [  55.50,   -4.15,  GMT,  1 ],
+        "Hamburg, Germany":             [  53.33,   10.20,  CET,  1 ],
+        "Helsinki, Finland":            [  60.10,   25.00,  EET,  1 ],
+        "Lisbon, Portugal":             [  38.44,   -9.90,  GMT,  1 ],
+        "Liverpool, England":           [  53.25,   -3.00,  GMT,  1 ],
+        "London, England":              [  51.32,   -0.50,  GMT,  1 ],
+        "Lyons, France":                [  45.45,    4.50,  CET,  1 ],
+        "Kiev, Ukraine":                [  50.27,   30.31,  CET,  1 ],
+        "Madrid, Spain":                [  40.26,   -3.42,  CET,  1 ],
+        "Manchester, England":          [  53.30,   -2.15,  GMT,  1 ],
+        "Marseilles, France":           [  43.20,    5.20,  CET,  1 ],
+        "Milan, Italy":                 [  45.27,    9.10,  CET,  1 ],
+        "Munich, Germany":              [  48.8,    11.35,  CET,  1 ],
+        "Naples, Italy":                [  40.50,   14.15,  CET,  1 ], 
+        "Oslo, Norway":                 [  59.57,   10.42,  CET,  1 ],
+        "Paris, France":                [  48.48,    2.20,  CET,  1 ],
+        "Reykjavik, Iceland":           [  64.40,  -21.58,  GMT,  0 ],
+        "Sofia, Bulgaria":              [  42.40,   23.20,  EET,  1 ],
+        "Prague, Czech Republic":       [  50.50,   14.26,  CET,  1 ],
+        "Rome, Italy":                  [  41.54,   12.27,  CET,  1 ],
+        "Stockholm, Sweden":            [  59.17,   18.30,  CET,  1 ],
+        "Venice, Italy":                [  45.26,   12.20,  CET,  1 ],
+        "Vienna, Austria":              [  48.14,   16.20,  CET,  1 ],
+        "Warsaw, Poland":               [  52.14,   21.00,  CET,  1 ],
+        "Zurich, Switzerland":          [  47.21,    8.31,  CET,  1 ],
+        
+        "Algiers, Algeria":             [  36.00,    3.00,  CET ],
+        "Cairo, Egypt":                 [  30.20,   31.21,  EET ],
+        "Cape Town, South Africa":      [ -33.55,   18.22,  SAST ],
+        "Dakar, Senegal":               [  14.40,  -17.28,  GMT ],
+        "Djibouti, Djibouti":           [  11.30,   43.30,  EAT ],
+        "Durban, South Africa":         [ -29.53,   30.53,  SAST ],
+        "Johannesburg, South Africa":   [ -26.12,   28.40,  SAST ],
+        "Kinshasa, Congo":              [  -4.18,   15.17,  WAT ],
+        "Lagos, Nigeria":               [   6.27,    3.23,  WAT ],
+        "Nairobi, Kenya":               [  -1.25,   36.55,  EAT ],
+        "Tripoli, Libya":               [  32.57,   13.12,  EET ],
 
-        "Aberdeen, Scotland": [57.9, -2.9],
-        "Adelaide, Australia ": [-34.55 , 138.36],
-        "Algiers, Algeria": [36.0, 3.0],
-        "Amsterdam, Netherlands": [52.22, 4.53],
-        "Ankara, Turkey ": [39.55, 32.55],
-        // "Asunción, Paraguay ": [-25.15, -57.40],
-        "Athens, Greece": [37.58, 23.43],
-        "Auckland, New Zealand ": [-36.52, 174.45],
-        "Bangkok, Thailand ": [13.45, 100.30],
-        "Barcelona, Spain": [41.23, 2.9],
-        "Beijing, China": [39.55, 116.25],
-        // "Belém, Brazil ": [-1.28, -48.29],
-        "Belfast, Northern Ireland": [54.37, -5.56],
-        "Belgrade, Serbia ": [44.52, 20.32],
-        "Berlin, Germany": [52.30, 13.25],
-        "Birmingham, England ": [52.25, -1.55 ],
-        "Bogota, Colombia ": [4.32, -74.15 ],
-        "Bombay, India": [19.0, 72.48],
-        "Bordeaux, France ": [44.50, -0.31 ],
-        "Bremen, Germany ": [53.5, 8.49],
-        "Brisbane, Australia ": [-27.29 , 153.8],
-        "Bristol, England ": [51.28, -2.35],
-        "Brussels, Belgium": [50.52, 4.22],
-        "Bucharest, Romania": [44.25, 26.7],
-        "Budapest, Hungary": [47.30, 19.5],
-        "Buenos Aires, Argentina": [-34.35, -58.22],
-        "Cairo, Egypt": [30.2, 31.21],
-        "Calcutta, India": [22.34, 88.24],
-        "Canton, China": [23.7, 113.15],
-        "Cape Town, South Africa": [-33.55, 18.22],
-        "Caracas, Venezuela ": [10.28, -67.2 ],
-        "Cayenne, French Guiana ": [4.49, -52.18 ],
-        "Chihuahua, Mexico ": [28.37, -106.5 ],
-        // "Chongqing, China ": [29.46, 106.34],
-        "Copenhagen, Denmark": [55.40, 12.34],
-        "Cordoba, Argentina ": [-31.28 , -64.10 ],
-        "Dakar, Senegal ": [14.40, -17.28 ],
-        "Darwin, Australia ": [-12.28 , 130.51],
-        "Djibouti, Djibouti": [11.30, 43.3],
-        "Dublin, Ireland": [53.20, -6.15 ],
-        "Durban, South Africa ": [-29.53, 30.53],
-        "Edinburgh, Scotland ": [55.55, -3.10],
-        "Frankfurt, Germany": [50.7, 8.41],
-        "Georgetown, Guyana ": [6.45, -58.15 ],
-        "Glasgow, Scotland ": [55.50, -4.15 ],
-        "Guatemala City, Guatemala ": [14.37, -90.31],
-        "Guayaquil, Ecuador ": [-2.10 , -79.56],
-        "Hamburg, Germany": [53.33, 10.2],
-        // "Hammerfest, Norway ": [70.38, 23.38],
-        "Havana, Cuba": [23.8, -82.23],
-        "Helsinki, Finland ": [60.10, 25.0],
-        // "Hobart, Tasmania ": [-42.52, 147.19],
-        "Hong Kong, China": [22.20, 114.11],
-        "Iquique, Chile ": [-20.10 , -70.7 ],
-        "Irkutsk, Russia ": [52.30, 104.20],
-        "Jakarta, Indonesia ": [-6.16, 106.48],
-        "Johannesburg, South Africa ": [-26.12, 28.4],
-        "Kingston, Jamaica ": [17.59, -76.49],
-        "Kinshasa, Congo": [-4.18, 15.17],
-        "Kuala Lumpur, Malaysia": [3.8, 101.42],
-        "La Paz, Bolivia ": [-16.27, -68.22],
-        "Lagos, Nigeria": [ 6.27, 3.23 ],
-        // 6°27′11″N 3°23′45″E
-        // "Leeds, England ": [53.45, -1.30],
-        "Lima, Peru ": [-12.0 , -77.2 ],
-        "Lisbon, Portugal": [38.44, -9.9],
-        "Liverpool, England ": [53.25, -3.0 ],
-        "London, England": [51.32, -0.5 ],
-        "Lyons, France ": [45.45, 4.50],
-        "Madrid, Spain": [40.26, -3.42 ],
-        "Manchester, England ": [53.30, -2.15 ],
-        "Manila, Philippines": [14.35, 120.57],
-        "Marseilles, France ": [43.20, 5.20],
-        // "Mazatlán, Mexico ": [23.12, -106.25 ],
-        "Mecca, Saudi Arabia ": [21.29, 39.45],
-        "Melbourne, Australia": [-37.47 , 144.58],
-        "Mexico City, Mexico": [19.26, -99.7 ],
-        "Milan, Italy ": [45.27, 9.10],
-        "Montevideo, Uruguay ": [-34.53, -56.10 ],
-        "Moscow, Russia": [55.45, 37.36],
-        "Munich, Germany ": [48.8, 11.35],
-        "Nagasaki, Japan ": [32.48, 129.57],
-        "Nagoya, Japan ": [35.7, 136.56],
-        "Nairobi, Kenya ": [-1.25, 36.55],
-        "Nanjing (Nanking), China ": [32.3, 118.53],
-        "Naples, Italy ": [40.50, 14.15],
-        "New Delhi, India": [28.35, 77.12],
-        "New York City, USA": [40.47, 73.58],
-        "Newcastle-on-Tyne, England ": [54.58, -1.37 ],
-        "Odessa, Ukraine ": [46.27, 30.48],
-        "Osaka, Japan ": [34.32, 135.30],
-        "Oslo, Norway": [59.57, 10.42],
-        "Panama City, Panama ": [8.58, -79.32 ],
-        "Paramaribo, Suriname ": [5.45, -55.15],
-        "Paris, France": [48.48, 2.20],
-        "Perth, Australia ": [-31.57 , 115.52],
-        "Plymouth, England ": [50.25, -4.5 ],
-        "Port Moresby, Papua New Guinea ": [-9.25, 147.8],
-        "Prague, Czech Republic": [50.5, 14.26],
-        "Rangoon, Myanmar": [16.50, 96.0],
-        "Reykjavik, Iceland ": [64.4, -21.58 ],
-        "Rio de Janeiro, Brazil": [-22.57, -43.12 ],
-        "Rome, Italy": [41.54, 12.27],
-        "Salvador, Brazil ": [-12.56 , -38.27 ],
-        "Santiago, Chile ": [-33.28, -70.45 ],
-        "St. Petersburg, Russia": [59.56, 30.18],
-        "Sao Paulo, Brazil ": [-23.31, -46.31],
-        "Shanghai, China ": [31.10, 121.28],
-        "Singapore, Singapore": [1.14, 103.55],
-        "Sofia, Bulgaria ": [42.40, 23.20],
-        "Stockholm, Sweden": [59.17, 18.3],
-        "Sydney, Australia ": [-34.0, 151.0],
-        "Tananarive, Madagascar ": [-18.50, 47.33],
-        "Teheran, Iran ": [35.45, 51.45],
-        "Tokyo, Japan": [35.40, 139.45],
-        "Tripoli, Libya ": [32.57, 13.12],
-        "Venice, Italy": [45.26, 12.20],
-        // "Veracruz, Mexico ": [19.10, -96.10 ],
-        "Vienna, Austria": [48.14, 16.20],
-        "Vladivostok, Russia ": [43.10, 132.0],
-        "Warsaw, Poland": [52.14, 21.0],
-        "Wellington, New Zealand ": [-41.17, 174.47],
-        "Zurich, Switzerland": [47.21, 8.31]
+
+        "Moscow, Russia":               [  55.45,   37.36,  MSD,  1 ],
+        "St. Petersburg, Russia":       [  59.56,   30.18,  MSD,  1 ],
+        "Vladivostok, Russia":          [  43.10,  132.00,   10,  1 ],
+                                                               
+                                                               
+        "Ankara, Turkey":               [  39.55,   32.55,  EET,  1 ],
+        "Istanbul, Turkey":              [  41.01,   28.58,  EET,  1 ],
+        "Mecca, Saudi Arabia":          [  21.29,   39.45,  AST,  0 ],
+        "Teheran, Iran":                [  35.45,   51.45,  IRT,  2 ],
+                                                               
+                                                               
+        "Adelaide, Australia":          [ -34.55,  138.36, ACST,  3 ],
+        "Auckland, New Zealand":        [ -36.52,  174.45, NZST,  4 ],
+        "Brisbane, Australia":          [ -27.29 , 153.80, AEST,  0 ],
+        "Darwin, Australia":            [ -12.28,  130.51, ACST,  0 ],
+        "Melbourne, Australia":         [ -37.47 , 144.58, AEST,  3 ],
+        "Perth, Australia":             [ -31.57 , 115.52, WST ,  0 ],
+        "Sydney, Australia":            [  -34.0,  151.00, AEST,  3 ],
+        "Wellington, New Zealand":      [ -41.17,  174.47, NZST,  4 ],
+        
+        
+        "Bangkok, Thailand":            [  13.45,  100.30,    7 ],
+        "Beijing, China":               [  39.55,  116.25, CNST ], 
+        "Calcutta, India":              [  22.34,   88.24,  IST ],
+        "Canton, China":                [  23.70,  113.15, CNST ],
+        "Chongqing, China":             [  29.46,  106.34, CNST ],
+        "Hong Kong, China":             [  22.20,  114.11, CNST ],
+        "Jakarta, Indonesia":           [  -6.16,  106.48,    7 ],
+        "Kuala Lumpur, Malaysia":       [   3.80,  101.42,    8 ],
+        "Manila, Philippines":          [  14.35,  120.57,    8 ],
+        "Mumbai, India":                [  19.00,   72.48,  IST ],
+        "Nagasaki, Japan":              [  32.48,  129.57,  JST ],
+        "Nagoya, Japan":                [  35.7,   136.56,  JST ],
+        "Nanjing, China":               [  32.3,   118.53, CNST ],
+        "New Delhi, India":             [  28.35,   77.12,  IST ],
+        "Osaka, Japan":                 [  34.32,  135.30,  JST ],
+     "Port Moresby, Papua New Guinea":  [  -9.25,  147.80,   10 ],
+        "Rangoon, Myanmar":             [  16.50,   96.00,  6.5 ],
+        "Shanghai, China":              [  31.10,  121.28, CNST ],
+        "Singapore, Singapore":         [   1.14,  103.55,    8 ],
+        "Tokyo, Japan":                 [  35.40,  139.45,  JST ],
+          
+        
+        "Bogota, Colombia":             [   4.32,  -74.15,   -5 ],        
+        "Buenos Aires, Argentina":      [ -34.35,  -58.22,  ART ],
+        "Caracas, Venezuela":           [  10.28,  -67.20, -4.5 ],
+        "Cayenne, French Guiana":       [   4.49,  -52.18,   -3 ],
+        "Cordoba, Argentina":           [ -31.28,  -64.10,  ART ],
+        "Georgetown, Guyana":           [   6.45,  -58.15,   -4 ],
+        "Guatemala City, Guatemala":    [  14.37,  -90.31,  CST ],
+        "Guayaquil, Ecuador":           [  -2.10,  -79.56,   -5 ],
+        "Havana, Cuba":                 [  23.80,  -82.23,   -5,  5 ],
+        "Kingston, Jamaica":            [  17.59,  -76.49,   -5 ],
+        "La Paz, Bolivia":              [ -16.27,  -68.22,   -4 ],
+        "Lima, Peru":                   [ -12.00,  -77.20,   -5 ],
+        "Mexico City, Mexico":          [  19.26,  -99.70,  CST,  6 ],
+        "Montevideo, Uruguay":          [ -34.53,  -56.10,   -3,  7 ],
+        "Panama City, Panama":          [   8.58,  -79.32,  EST ],
+        "Paramaribo, Suriname":         [   5.45,  -55.15,   -3 ],
+        "Rio de Janeiro, Brazil":       [ -22.57,  -43.12, BRST,  8 ],
+        "Salvador, Brazil":             [ -12.56 , -38.27, BRST,  0 ],
+        "Santiago, Chile":              [ -33.28,  -70.45,   -4,  9 ],
+        "Sao Paulo, Brazil":            [ -23.31,  -46.31, BRST,  8 ],
+
+
+        // Dallas
+        // Boston
+        
+        "New York City, USA":           [  40.47,   73.58,  EST, 10 ]
+
       };
       
 
@@ -435,6 +471,8 @@
         return tmp;
       }
       
+      
+      
       var LOCATION = 'London, England';
           X = 365,
           Y = 24,
@@ -456,8 +494,7 @@
           
       // var CITY = geo.ll[2].city;
 
-      var DST_START = new Date("28 March 2010"),
-          DST_END = new Date("31 October 2010");
+      var DST_START, DST_END;
         
       
       $(window).ready(function() {
@@ -488,6 +525,9 @@
       
       function refresh() {
         // $('#example').height(Y * Y_SCALE).width(X * X_SCALE);
+        
+        DST_START = SUNTIME[ DB[LOCATION][2] ];
+        DST_END = SUNTIME[ DB[LOCATION][2] ];
         
         NOW = new Date();
         current_day = JAN_FIRST.getTime(),
@@ -747,6 +787,7 @@
       }
       
       body {
+/*        font-family: Geneva;*/
         font-family: Georgia;
         background: #000028;
 /*        padding: 24px 48px;*/
@@ -925,7 +966,12 @@
         margin: 0 4px;
         color: #ccd;
       }
-      
+
+      #sun strong {
+        font-weight: normal;
+        color: #bbc;
+/*        text-decoration: line-through;*/
+      }      
       
       #about {
         z-index: -1;
@@ -959,10 +1005,10 @@
     
       <div id="sun">
         <div id="rise">
-          <span id='sunrise'></span> &uarr;
+           <strong>&uarr;</strong> <span id='sunrise'></span>
         </div>
         <div id="set">
-          <span id="sunset"></span> &darr;
+           <strong>&darr;</strong> <span id="sunset"></span>
         </div>
       </div>
     
@@ -987,12 +1033,19 @@
         <div>Oct</div>
         <div>Nov</div>
         <div>Dec</div>      
-        <span id="date">10</span>
+        <span id="date"></span>
       </div>
     </div>
     
     <div id="about">
       &copy; <a href="http://sturob.com/">Stuart Robinson</a> 2010
+      <!-- div id="share">
+        fb
+        twitter
+        stumbleupon
+        delicious
+        digg
+        -->
     </div>
     
     <script type="text/javascript">
