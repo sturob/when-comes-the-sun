@@ -462,7 +462,7 @@
           return UT;
       }
       
-      
+      // fix me
       function adjust_time_hack(hours) {
         var tmp = hours + Math.ceil(LAT / 15);
         while (tmp >= 24) tmp -= 24.0;
@@ -525,9 +525,14 @@
       
       function refresh() {
         // $('#example').height(Y * Y_SCALE).width(X * X_SCALE);
-        
-        DST_START = SUNTIME[ DB[LOCATION][2] ];
-        DST_END = SUNTIME[ DB[LOCATION][2] ];
+        // alert()
+        if (DB[LOCATION][3]){
+          DST_START = new Date ( SUNTIME[ DB[LOCATION][3] ][0] + "2010" );
+          DST_END = new Date ( SUNTIME[ DB[LOCATION][3] ][1] + "2010" );
+        } else {
+          DST_END = null;
+          DST_START = null;
+        }
         
         NOW = new Date();
         current_day = JAN_FIRST.getTime(),
