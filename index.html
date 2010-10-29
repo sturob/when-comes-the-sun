@@ -119,11 +119,14 @@
         [ "31 October", "4 April"], // mexico
         [ "3 October", "14 March"], // uruguay
         [ "17 October", "21 February" ],  // brazil
-        [ "4 April", "10 October"],  // chile
-        ["14 March", "7 November"]
+        [ "4 April", "10 October" ],  // chile
+        [ "14 March", "7 November" ]  // US + canada
       ];
       
-      var CST = -6,
+      
+      var PST = -8,
+          MST = -7,
+          CST = -6,
           EST = -5,
           BRST = -3,
           ART  = -3,
@@ -147,6 +150,8 @@
 
       var DB = {
         // long, lat, time_offset, summerzone
+        "Europe": false,
+        
         "Amsterdam, Netherlands":       [  52.22,    4.53,  CET,  1 ],
         "Athens, Greece":               [  37.58,   23.43,  EET,  1 ],
         "Barcelona, Spain":             [  41.23,    2.90,  CET,  1 ],
@@ -172,6 +177,7 @@
         "Manchester, England":          [  53.30,   -2.15,  GMT,  1 ],
         "Marseilles, France":           [  43.20,    5.20,  CET,  1 ],
         "Milan, Italy":                 [  45.27,    9.10,  CET,  1 ],
+        "Moscow, Russia":               [  55.45,   37.36,  MSD,  1 ],
         "Munich, Germany":              [  48.8,    11.35,  CET,  1 ],
         "Naples, Italy":                [  40.50,   14.15,  CET,  1 ], 
         "Oslo, Norway":                 [  59.57,   10.42,  CET,  1 ],
@@ -180,11 +186,15 @@
         "Sofia, Bulgaria":              [  42.40,   23.20,  EET,  1 ],
         "Prague, Czech Republic":       [  50.50,   14.26,  CET,  1 ],
         "Rome, Italy":                  [  41.54,   12.27,  CET,  1 ],
+        "St. Petersburg, Russia":       [  59.56,   30.18,  MSD,  1 ],
         "Stockholm, Sweden":            [  59.17,   18.30,  CET,  1 ],
         "Venice, Italy":                [  45.26,   12.20,  CET,  1 ],
         "Vienna, Austria":              [  48.14,   16.20,  CET,  1 ],
+        "Vladivostok, Russia":          [  43.10,  132.00,   10,  1 ],
         "Warsaw, Poland":               [  52.14,   21.00,  CET,  1 ],
         "Zurich, Switzerland":          [  47.21,    8.31,  CET,  1 ],
+
+        "Africa": false,
         
         "Algiers, Algeria":             [  36.00,    3.00,  CET ],
         "Cairo, Egypt":                 [  30.20,   31.21,  EET ],
@@ -197,18 +207,13 @@
         "Lagos, Nigeria":               [   6.27,    3.23,  WAT ],
         "Nairobi, Kenya":               [  -1.25,   36.55,  EAT ],
         "Tripoli, Libya":               [  32.57,   13.12,  EET ],
-
-
-        "Moscow, Russia":               [  55.45,   37.36,  MSD,  1 ],
-        "St. Petersburg, Russia":       [  59.56,   30.18,  MSD,  1 ],
-        "Vladivostok, Russia":          [  43.10,  132.00,   10,  1 ],
-                                                               
                                                                
         "Ankara, Turkey":               [  39.55,   32.55,  EET,  1 ],
-        "Istanbul, Turkey":              [  41.01,   28.58,  EET,  1 ],
+        "Istanbul, Turkey":             [  41.01,   28.58,  EET,  1 ],
         "Mecca, Saudi Arabia":          [  21.29,   39.45,  AST,  0 ],
         "Teheran, Iran":                [  35.45,   51.45,  IRT,  2 ],
-                                                               
+                  
+        "Oceania": false,
                                                                
         "Adelaide, Australia":          [ -34.55,  138.36, ACST,  3 ],
         "Auckland, New Zealand":        [ -36.52,  174.45, NZST,  4 ],
@@ -219,6 +224,8 @@
         "Sydney, Australia":            [  -34.0,  151.00, AEST,  3 ],
         "Wellington, New Zealand":      [ -41.17,  174.47, NZST,  4 ],
         
+        
+        "Asia": false,
         
         "Bangkok, Thailand":            [  13.45,  100.30,    7 ],
         "Beijing, China":               [  39.55,  116.25, CNST ], 
@@ -239,8 +246,11 @@
         "Rangoon, Myanmar":             [  16.50,   96.00,  6.5 ],
         "Shanghai, China":              [  31.10,  121.28, CNST ],
         "Singapore, Singapore":         [   1.14,  103.55,    8 ],
+        "Seoul, South Korea":           [  37.33,  126.59,    9 ],
         "Tokyo, Japan":                 [  35.40,  139.45,  JST ],
           
+        
+        "South America": false,
         
         "Bogota, Colombia":             [   4.32,  -74.15,   -5 ],        
         "Buenos Aires, Argentina":      [ -34.35,  -58.22,  ART ],
@@ -263,14 +273,27 @@
         "Santiago, Chile":              [ -33.28,  -70.45,   -4,  9 ],
         "Sao Paulo, Brazil":            [ -23.31,  -46.31, BRST,  8 ],
 
-
-        // Dallas
-        // Boston
+        "North America": false,
         
-        "New York City, USA":           [  40.47,   73.58,  EST, 10 ]
-
+        "Atlanta, USA":                 [  33.45,   84.23,  EST, 10 ],
+        "Boston, USA":                  [  42.21,   71.50,  EST, 10 ], 
+        "Calgary, Canada":              [  51.10,  114.10,  MST, 10 ],
+        "Chicago, USA":                 [  41.50,   87.37,  CST, 10 ], 
+        "Columbus, USA":                [  34.00, 	81.20,  EST, 10 ],
+        "Dallas, USA":                  [  32.46,	  96.46,  CST, 10 ],
+        "Detroit, USA":                 [  42.20,	  83.30,  EST, 10 ],
+        "Houston, USA":                 [  29.45,	  95.21,  CST, 10 ],
+        "Los Angeles, USA":             [  34.30,	 118.15,  PST, 10 ],
+        "New York City, USA":           [  40.47,   73.58,  EST, 10 ],
+        "New Orleans, USA":             [  29.57,	  90.40,  CST, 10 ],
+        "Philadelphia, USA":            [  39.57,	  75.10,  EST, 10 ],
+        "Phoenix, USA":                 [  33.29,	 112.40,  MST,  0 ],
+        "San Diego, USA":               [  32.42,	 117.10,  PST, 10 ],
+        "San Francisco, USA":           [  37.47,	 122.26,  PST, 10 ],
+        "Seattle, USA":                 [  47.37,	 122.20,  PST, 10 ],
+        "Toronto, Canada":              [  43.40,   79.24,  EST, 10 ],
+        "Vancouver, Canada":            [  49.13,  123.06,  PST, 10 ]
       };
-      
 
       var DESCRIPTION = {
         predawn: "Dawn approaches ",
@@ -455,6 +478,9 @@
 
           // remove me
           UT += Math.ceil(longitude / 15);
+          
+          // UT -= DB[LOCATION][2];
+
 
           while (UT >= 24) UT -= 24.0;
           while (UT <  0)  UT += 24.0;
@@ -464,7 +490,8 @@
       
       // fix me
       function adjust_time_hack(hours) {
-        var tmp = hours + Math.ceil(LAT / 15);
+        var tmp = hours + DB[LOCATION][2];
+        
         while (tmp >= 24) tmp -= 24.0;
         while (tmp <  0)  tmp += 24.0;
         
@@ -473,7 +500,7 @@
       
       
       
-      var LOCATION = 'London, England';
+      var LOCATION = 'London, England',
           X = 365,
           Y = 24,
           X_SCALE = 1,
@@ -482,24 +509,21 @@
           HOUR_IN_MS = 60 * 60 * 1000;
           DAY_IN_MS = HOUR_IN_MS * 24,
           current_day = JAN_FIRST.getTime(),
-          // LONG = 64, // geo.ll[0].long,
-          // LAT = 21, // geo.ll[0].lat,
-          // LONG = 51,
-          // LAT = 1,
-          
           LONG = DB[LOCATION][0],
           LAT = DB[LOCATION][1],
           NOW = new Date(),
           ROUGH_TWILIGHT_LENGTH = 0;
-          
-      // var CITY = geo.ll[2].city;
 
       var DST_START, DST_END;
         
-      
+
       $(window).ready(function() {
         $.each(DB, function(city, ll) {
-          $('#cities').append("<span>" + city + "</span> ");
+          if (ll) {
+            $('#cities').append("<span>" + city + "</span> ");
+          } else {
+            $('#cities').append('<h2>' + city + '</h2>');
+          }
         });
       
         // $('#cities').hide();
@@ -527,14 +551,16 @@
         // $('#example').height(Y * Y_SCALE).width(X * X_SCALE);
         // alert()
         if (DB[LOCATION][3]){
-          DST_START = new Date ( SUNTIME[ DB[LOCATION][3] ][0] + "2010" );
-          DST_END = new Date ( SUNTIME[ DB[LOCATION][3] ][1] + "2010" );
+          DST_START = new Date ( SUNTIME[ DB[LOCATION][3] ][0] + " 2010" );
+          DST_END = new Date ( SUNTIME[ DB[LOCATION][3] ][1] + " 2010" );
         } else {
           DST_END = null;
           DST_START = null;
         }
         
-        NOW = new Date();
+        
+        var tmp = new Date();
+        NOW = new Date( Date.now() + tmp.getTimezoneOffset() * 60 * 1000 );
         current_day = JAN_FIRST.getTime(),
         
         $('h1 span#location').html(LOCATION);
@@ -547,7 +573,7 @@
       
         for (var x=0; x < X; x++) {
           var current_date = new Date(current_day);
-
+          
           var dawn = CalculateSunriseOrSunset(LONG, LAT, current_date, true, true);
           var dusk = CalculateSunriseOrSunset(LONG, LAT, current_date, false, true);
           
@@ -661,12 +687,18 @@
             draw_dawn(cx);
             draw_dusk(cx);
           }
+          
           draw_permidarkness(cx);
           draw_permitwilight(cx);
 
           
           current_day += DAY_IN_MS;
         }
+        
+        // end draw background
+
+        
+        
         
         // today line
         cx.fillStyle = "rgba(150, 150, 0, 0.4)";
@@ -680,7 +712,9 @@
           }
         }
         
-        var guessed_hours = adjust_time_hack(NOW.getMinuteOfTheDay() / 60);
+        var summertime_offset = (NOW > DST_START && NOW < DST_END) ?  1 : 0;
+        
+        var guessed_hours = adjust_time_hack(NOW.getMinuteOfTheDay() / 60) + summertime_offset;
         
         var now_minutes_pos = Math.floor(guessed_hours * Y_SCALE);
         // var now_minutes_pos = Math.floor(NOW.getMinuteOfTheDay() / 60 * Y_SCALE);
@@ -697,20 +731,10 @@
         cx.fillRect(X_SCALE * NOW.getDayOfTheYear() - 1, now_minutes_pos - 1, 3, 3);
         
         
-        var sunrise = CalculateSunriseOrSunset(LONG, LAT, NOW, true);
-        var sunset = CalculateSunriseOrSunset(LONG, LAT, NOW, false);
-        var dawn = CalculateSunriseOrSunset(LONG, LAT, NOW, true, true);
-        var dusk = CalculateSunriseOrSunset(LONG, LAT, NOW, false, true);
-
-        // sunset = adjust_time_hack(sunset);
-        // sunrise = adjust_time_hack(sunrise);
-        
-        if (NOW > DST_START && NOW < DST_END ) {
-          sunrise += 1;
-          sunset += 1;
-          dawn += 1;
-          dusk += 1;
-        }
+        var sunrise = CalculateSunriseOrSunset(LONG, LAT, NOW, true)        + summertime_offset;
+        var sunset  = CalculateSunriseOrSunset(LONG, LAT, NOW, false)       + summertime_offset;
+        var dawn    = CalculateSunriseOrSunset(LONG, LAT, NOW, true, true)  + summertime_offset;
+        var dusk    = CalculateSunriseOrSunset(LONG, LAT, NOW, false, true) + summertime_offset;
         
 
         // sun rise + set horizontals
@@ -776,11 +800,11 @@
       }
 
       function n_to_hhmm (n) {
-        var tmp = new Date(HOUR_IN_MS * n);
-        var mins = tmp.getMinutes() + "";
-        if (mins.length == 1) { mins = "0" + mins; }
-        
-        return tmp.getHours() + ":" + mins;
+        var both = n.toString().split('.');
+        var mins = "0." + (both[1] || 0); // to denominator
+        mins *= 60; // to minutes
+        mins += ""; // to string
+        return both[0] + ":" + Math.floor(mins.length > 1 ? mins : "0" + mins)
       }
 
     </script> 
@@ -843,18 +867,25 @@
         z-index: 1;
         left: 0;
         color: #ccc;
-        line-height: 1.8em;
+        line-height: 1.4em;
 /*        word-spacing: -5px;*/
-        text-align: center;
+/*        text-align: center;*/
         
       }
 
+      #cities h2 {
+        font-size: 12px;
+        margin-top: 6px;
+      }
+
       #cities span {
-        margin-right: 24px;
+        margin-right: 12px;
         letter-spacing: 1px;
 /*        display: block;*/
 /*        float: left;*/
         white-space: nowrap;
+        font-size: 12px;
+        
 /*        border-bottom: 1px solid #999;*/
 /*          padding: 0 12px 0 12px;*/
       }
