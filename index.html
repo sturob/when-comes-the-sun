@@ -8,12 +8,11 @@
     </script>
 
     <!-- 
-      geo detect
-      contact
       fix southern hemisphere timezones
       -
       fb / tw / etc
       add cities from analytics- dubai, jerusalum etc
+      option to use detected ll + infer summertime from country
       fix coordinates
       canvas for IE
     -->
@@ -82,12 +81,12 @@
         [], // no summertime
         [ "28 March", "31 October" ], // europe
         [ "22 March 2010", "22 September" ], // iran
-        [ "3 October", "4 April"], // australias
-        [ "26 September", "4 April"], // nz
-        [ "31 October", "14 March"], // cuba
-        [ "31 October", "4 April"], // mexico
-        [ "3 October", "14 March"], // uruguay
-        [ "17 October", "21 February" ],  // brazil
+        [ "4 April", "3 October" ], // australias
+        [ "4 April", "26 September"], // nz
+        [ "14 March", "31 October" ], // cuba
+        [ "4 April", "31 October" ], // mexico
+        [ "14 March",  "3 October" ], // uruguay
+        [ "21 February", "17 October" ],  // brazil
         [ "4 April", "10 October" ],  // chile
         [ "14 March", "7 November" ]  // US + canada
       ];
@@ -140,7 +139,7 @@
         "Liverpool, United Kingdom":    [  53.25,   -3.00,  GMT,  1 ],
         "London, United Kingdom":       [  51.32,   -0.50,  GMT,  1 ],
         "Lyons, France":                [  45.45,    4.50,  CET,  1 ],
-        "Kiev, Ukraine":                [  50.27,   30.31,  CET,  1 ],
+        "Kiev, Ukraine":                [  50.27,   30.31,  EET,  1 ],
         "Madrid, Spain":                [  40.26,   -3.42,  CET,  1 ],
         "Manchester, United Kingdom":   [  53.30,   -2.15,  GMT,  1 ],
         "Marseilles, France":           [  43.20,    5.20,  CET,  1 ],
@@ -454,22 +453,24 @@
           // UT -= DB[LOCATION][2];
 
 
-          while (UT >= 24) UT -= 24.0;
-          while (UT <  0)  UT += 24.0;
+          // while (UT >= 24) UT -= 24.0;
+          // while (UT <  0)  UT += 24.0;
 
-          return UT;
+          return box_hours(UT);
       }
       
-      // fix me
+      // 
       function adjust_time_hack(hours) {
         var tmp = hours + DB[LOCATION][2];
         
-        while (tmp >= 24) tmp -= 24.0;
-        while (tmp <  0)  tmp += 24.0;
-        
-        return tmp;
+        return box_hours(tmp);
       }
       
+      function box_hours (tmp) {
+         while (tmp >= 24) tmp -= 24.0;
+          while (tmp <  0)  tmp += 24.0;
+          return tmp;
+      }
       
       var loc_string = geo.ll[2].city + ', ' + geo.ll[2].country;
       if (! DB[loc_string] ) {
@@ -522,7 +523,15 @@
         setInterval(refresh, 20000);      
       });
       
-
+      function calc_summertime_offset (now) {
+        if (! DB[LOCATION][3]) return 0;
+        
+        if (DB[LOCATION][0] < 0) { // southern hem
+          return ((now < DST_START) || (now > DST_END)) ? 1 : 0;
+        } else {
+          return (now > DST_START && now < DST_END) ? 1 : 0;  
+        }
+      }
       
       function refresh() {
         // $('#example').height(Y * Y_SCALE).width(X * X_SCALE);
@@ -534,7 +543,6 @@
           DST_END = null;
           DST_START = null;
         }
-        
         
         var tmp = new Date();
         NOW = new Date( Date.now() + tmp.getTimezoneOffset() * 60 * 1000 );
@@ -568,12 +576,11 @@
             }
           }
           
-          if ((current_date > DST_START) && (current_date < DST_END) ) {
-            sunrise += 1;
-            sunset += 1;
-            dusk += 1;
-            dawn += 1;
-          }
+          var offset = calc_summertime_offset(current_date);
+          sunrise += offset;
+          sunset += offset;
+          dusk += offset;
+          dawn += offset;
           
           cx.fillStyle = "rgb(240,240,255)";
 
@@ -688,9 +695,9 @@
           }
         }
         
-        var summertime_offset = (NOW > DST_START && NOW < DST_END) ?  1 : 0;
+        var summertime_offset = calc_summertime_offset(NOW);        
         
-        var guessed_hours = adjust_time_hack(NOW.getMinuteOfTheDay() / 60) + summertime_offset;
+        var guessed_hours = box_hours(adjust_time_hack(NOW.getMinuteOfTheDay() / 60) + summertime_offset);
         
         var now_minutes_pos = Math.floor(guessed_hours * Y_SCALE);
         // var now_minutes_pos = Math.floor(NOW.getMinuteOfTheDay() / 60 * Y_SCALE);
@@ -706,10 +713,10 @@
         cx.fillRect(X_SCALE * NOW.getDayOfTheYear() - 1, now_minutes_pos - 1, 3, 3);
         
         
-        var sunrise = CalculateSunriseOrSunset(LONG, LAT, NOW, true)        + summertime_offset;
-        var sunset  = CalculateSunriseOrSunset(LONG, LAT, NOW, false)       + summertime_offset;
-        var dawn    = CalculateSunriseOrSunset(LONG, LAT, NOW, true, true)  + summertime_offset;
-        var dusk    = CalculateSunriseOrSunset(LONG, LAT, NOW, false, true) + summertime_offset;
+        var sunrise = box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, true) + summertime_offset);
+        var sunset  = box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, false) + summertime_offset);
+        var dawn    = box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, true, true)  + summertime_offset);
+        var dusk    = box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, false, true) + summertime_offset);
         
 
         // sun rise + set horizontals
@@ -889,7 +896,7 @@
         top: 50%;
         left: 0px;
         width: 370px;
-        margin: -240px auto 0;
+        margin: -250px auto 0;
       }
       
       canvas {
@@ -999,13 +1006,20 @@
 /*        text-decoration: line-through;*/
       }      
       
+      #contact {
+        position: absolute;
+        left: 24px;
+/*        top: 12px;*/
+      }
       #about {
         z-index: -1;
         font-family: Helvetica Neue;
         font-weight: 300;
         position: absolute;
         bottom: 12px;
-        width: 100%;
+        left: 50%;
+        margin-left: -200px;
+        width: 400px;
         text-align: center;
         color: #446;
         font-size: 10px;
@@ -1064,9 +1078,12 @@
     </div>
     
     <div id="about">
-      &copy; <a href="http://sturob.com/">Stuart Robinson</a> 2010
+      <div id="contact">
+        <a href="mailto:aboutthesun@sturob.com">Feedback</a>
+      </div>
+      &copy; <a href="http://sturob.com/">Stuart Robinson</a> - 2010
       <!-- div id="share">
-        fb
+        facebook
         twitter
         stumbleupon
         delicious
