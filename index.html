@@ -9,17 +9,17 @@
 
     <!-- 
       geo detect
+      contact
       fix southern hemisphere timezones
-      tidy up arabia
       -
+      fb / tw / etc
       add cities from analytics- dubai, jerusalum etc
       fix coordinates
       canvas for IE
     -->
 
-    <!--  <script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script> -->
+    <script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script>
     
-
     <script type="text/javascript">
       /**
        * Get the value of a cookie with the given name.
@@ -124,26 +124,25 @@
         "Amsterdam, Netherlands":       [  52.22,    4.53,  CET,  1 ],
         "Athens, Greece":               [  37.58,   23.43,  EET,  1 ],
         "Barcelona, Spain":             [  41.23,    2.90,  CET,  1 ],
-        "Belfast, Northern Ireland":    [  54.37,   -5.56,  GMT,  1 ],
+        "Belfast, United Kingdom":      [  54.37,   -5.56,  GMT,  1 ],
         "Belgrade, Serbia":             [  44.52,   20.32,  CET,  1 ],
-        "Birmingham, England":          [  52.25,   -1.55,  GMT,  1 ],
         "Brussels, Belgium":            [  50.52,    4.22,  CET,  1 ],
         "Bucharest, Romania":           [  44.25,   26.70,  EET,  1 ],
         "Budapest, Hungary":            [  47.30,   19.50,  CET,  1 ],
         "Copenhagen, Denmark":          [  55.40,   12.34,  CET,  1 ],
         "Dublin, Ireland":              [  53.20,   -6.15,  GMT,  1 ],
-        "Edinburgh, Scotland":          [  55.55,   -3.10,  GMT,  1 ],
+        "Edinburgh, United Kingdom":    [  55.55,   -3.10,  GMT,  1 ],
         "Frankfurt, Germany":           [   50.7,    8.41,  CET,  1 ],
         "Glasgow, Scotland":            [  55.50,   -4.15,  GMT,  1 ],
         "Hamburg, Germany":             [  53.33,   10.20,  CET,  1 ],
         "Helsinki, Finland":            [  60.10,   25.00,  EET,  1 ],
         "Lisbon, Portugal":             [  38.44,   -9.90,  GMT,  1 ],
-        "Liverpool, England":           [  53.25,   -3.00,  GMT,  1 ],
-        "London, England":              [  51.32,   -0.50,  GMT,  1 ],
+        "Liverpool, United Kingdom":    [  53.25,   -3.00,  GMT,  1 ],
+        "London, United Kingdom":       [  51.32,   -0.50,  GMT,  1 ],
         "Lyons, France":                [  45.45,    4.50,  CET,  1 ],
         "Kiev, Ukraine":                [  50.27,   30.31,  CET,  1 ],
         "Madrid, Spain":                [  40.26,   -3.42,  CET,  1 ],
-        "Manchester, England":          [  53.30,   -2.15,  GMT,  1 ],
+        "Manchester, United Kingdom":   [  53.30,   -2.15,  GMT,  1 ],
         "Marseilles, France":           [  43.20,    5.20,  CET,  1 ],
         "Milan, Italy":                 [  45.27,    9.10,  CET,  1 ],
         "Moscow, Russia":               [  55.45,   37.36,  MSD,  1 ],
@@ -472,8 +471,12 @@
       }
       
       
+      var loc_string = geo.ll[2].city + ', ' + geo.ll[2].country;
+      if (! DB[loc_string] ) {
+        loc_string = false;
+      }
       
-      var LOCATION = $.cookie('CITY') || 'London, England',
+      var LOCATION = $.cookie('CITY') || loc_string || 'London, United Kingdom',
           X = 365,
           Y = 24,
           X_SCALE = 1,
