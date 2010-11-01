@@ -7,6 +7,9 @@
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js">    
     </script>
 
+    <!--[if IE]><script type="text/javascript" src="js/excanvas.js"></script><![endif]-->
+
+
     <!-- 
       fix southern hemisphere timezones
       -
@@ -1008,7 +1011,7 @@
       
       #contact {
         position: absolute;
-        left: 24px;
+        right: 24px;
 /*        top: 12px;*/
       }
       #about {
@@ -1081,7 +1084,9 @@
       <div id="contact">
         <a href="mailto:aboutthesun@sturob.com">Feedback</a>
       </div>
-      &copy; <a href="http://sturob.com/">Stuart Robinson</a> - 2010
+      <div id="copyright">
+        &copy; <a href="http://sturob.com/">Stuart Robinson</a> - 2010
+      </div>
       <!-- div id="share">
         facebook
         twitter
