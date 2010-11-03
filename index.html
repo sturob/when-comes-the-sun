@@ -2,7 +2,7 @@
   <head> 
     <title>When Comes the Sun</title> 
 
-    <meta name="viewport" width="450" />
+    <meta name="viewport" content="width=480" />
 
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js">    
     </script>
@@ -509,6 +509,7 @@
         
         if (TOUCH_INTERFACE) {
           $('body').addClass('TOUCH');
+          setTimeout(scrollTo, 0, 0, 1);
         }
         
         $.each(DB, function(city, ll) {
