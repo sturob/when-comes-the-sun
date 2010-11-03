@@ -2,7 +2,7 @@
   <head> 
     <title>When Comes the Sun</title> 
 
-    <!-- <meta name="viewport" content="user-scalable=no, width=device-width" /> -->
+    <meta name="viewport" width="450" />
 
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js">    
     </script>
@@ -11,13 +11,12 @@
 
 
     <!-- 
-      fix southern hemisphere timezones
-      -
       fb / tw / etc
-      add cities from analytics- dubai, jerusalum etc
+      interactive overlay
+      iphone/ipad optimised version - tap to show stuff
+      add cities from analytics - dubai, jerusalum etc
       option to use detected ll + infer summertime from country
       fix coordinates
-      canvas for IE
     -->
 
     <script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script>
@@ -496,8 +495,22 @@
 
       var DST_START, DST_END;
         
+        
+      var ua = navigator.userAgent.toLowerCase();
+      var TOUCH_INTERFACE = ((ua.indexOf('iphone')        != -1) ||
+                             (ua.indexOf('ipod')          != -1) || 
+                             (ua.indexOf('ipad')          != -1) ||
+                             (ua.indexOf('android')       != -1) ||
+                             (ua.indexOf('webos')         != -1) ||
+                             (ua.indexOf('windows phone') != -1)
+                            );
 
       $(window).ready(function() {
+        
+        if (TOUCH_INTERFACE) {
+          $('body').addClass('TOUCH');
+        }
+        
         $.each(DB, function(city, ll) {
           if (ll) {
             $('#cities').append("<span>" + city + "</span> ");
@@ -810,6 +823,10 @@
         height: 100%;
       }
       
+      body.TOUCH {
+        height: 500px;
+      }
+      
       h1 {
         font-size: 24px;
         position: absolute;
@@ -900,6 +917,11 @@
         left: 0px;
         width: 370px;
         margin: -250px auto 0;
+      }
+      
+      body.TOUCH div#main {
+        margin-top: 36px;
+        top: 0px;
       }
       
       canvas {
@@ -1028,6 +1050,11 @@
         font-size: 10px;
       }
       
+      body.TOUCH #about {
+        position: relative;
+        bottom: -48px;
+      }
+      
       a {
         color: #446;
       }
@@ -1042,7 +1069,7 @@
     </div>
     
     <div id="main">
-      <canvas id="example" width="730" height="481">
+      <canvas id="example" width="420" height="481">
         Sorry, your browser does not support HTML5 Canvas.
       </canvas>
     
@@ -1087,13 +1114,16 @@
       <div id="copyright">
         &copy; <a href="http://sturob.com/">Stuart Robinson</a> - 2010
       </div>
-      <!-- div id="share">
-        facebook
-        twitter
-        stumbleupon
-        delicious
-        digg
-        -->
+      <!-- <div id="share">
+            <div class="addthis_toolbox addthis_default_style">
+              <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+              <a class="addthis_button_tweet"></a>
+              <a class="addthis_counter addthis_pill_style"></a>
+            </div>
+            <script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script>
+            <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=whencomesthesun"></script>
+          </div> -->
+       
     </div>
     
     <script type="text/javascript">
