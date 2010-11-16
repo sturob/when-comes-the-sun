@@ -1,10 +1,10 @@
-<html> 
+<html manifest="/cache.manifest"> 
   <head> 
     <title>When Comes the Sun</title> 
 
     <meta name="viewport" content="width=480" />
 
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js">    
+    <script type="text/javascript" src="js/jquery.1.4.4.min.js">    
     </script>
 
     <!--[if IE]><script type="text/javascript" src="js/excanvas.js"></script><![endif]-->
@@ -14,12 +14,14 @@
       fb / tw / etc
       interactive overlay
       iphone/ipad optimised version - tap to show stuff
+      
       add cities from analytics - dubai, jerusalum etc
+      
       option to use detected ll + infer summertime from country
       fix coordinates
     -->
 
-    <script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script>
+    <!-- // <script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script> -->
     
     <script type="text/javascript">
       /**
@@ -474,12 +476,16 @@
           return tmp;
       }
       
-      var loc_string = geo.ll[2].city + ', ' + geo.ll[2].country;
-      if (! DB[loc_string] ) {
-        loc_string = false;
+      var loc_string = 'London, United Kingdom';
+      
+      if (false && geo) {
+        loc_string = geo.ll[2].city + ', ' + geo.ll[2].country;
+        if (! DB[loc_string] ) {
+          loc_string = false;
+        }
       }
       
-      var LOCATION = $.cookie('CITY') || loc_string || 'London, United Kingdom',
+      var LOCATION = $.cookie('CITY') || loc_string,
           X = 365,
           Y = 24,
           X_SCALE = 1,
@@ -509,7 +515,6 @@
         
         if (TOUCH_INTERFACE) {
           $('body').addClass('TOUCH');
-          setTimeout(scrollTo, 0, 0, 1);
         }
         
         $.each(DB, function(city, ll) {
@@ -519,9 +524,6 @@
             $('#cities').append('<hr><h2>' + city + '</h2>');
           }
         });
-      
-        // $('#cities').hide();
-
       
         $('#cities span').click(function() {
           var city = $(this).text();
@@ -536,6 +538,10 @@
         $('h1 a').click(function() {
           $('#cities').toggle();
         });
+
+        if (TOUCH_INTERFACE) {
+          window.scrollTo(0, 1);
+        }
 
         setInterval(refresh, 20000);      
       });
@@ -696,9 +702,6 @@
         }
         
         // end draw background
-
-        
-        
         
         // today line
         cx.fillStyle = "rgba(150, 150, 0, 0.4)";
@@ -775,9 +778,6 @@
         // if (now_n < sunrise && now_n > dawn) {
         //   desc = DESCRIPTION.dawn;
         // }
-        
-        
-
         // $status.text(desc);
 
         $($('#months div').get(NOW.getMonth())).addClass('ACTIVE');
@@ -1053,7 +1053,7 @@
       
       body.TOUCH #about {
         position: relative;
-        bottom: -48px;
+        bottom: -64px;
       }
       
       a {
