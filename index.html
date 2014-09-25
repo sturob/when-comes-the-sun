@@ -1,4 +1,5 @@
 <html manifest="/cache.manifest"> 
+<!-- <html>  -->
   <head> 
     <title>When Comes the Sun</title> 
 
@@ -84,7 +85,7 @@
       var SUNTIME = [
         [], // no summertime
         [ "28 March", "31 October" ], // europe
-        [ "22 March 2010", "22 September" ], // iran
+        [ "22 March", "22 September" ], // iran
         [ "4 April", "3 October" ], // australias
         [ "4 April", "26 September"], // nz
         [ "14 March", "31 October" ], // cuba
@@ -484,13 +485,16 @@
           loc_string = false;
         }
       }
+
+
+      var currentYear = (new Date()).getFullYear();
       
       var LOCATION = $.cookie('CITY') || loc_string,
           X = 365,
           Y = 24,
           X_SCALE = 1,
           Y_SCALE = 20,
-          JAN_FIRST = new Date('2010/01/01'),
+          JAN_FIRST = new Date(currentYear + '/01/01'),
           HOUR_IN_MS = 60 * 60 * 1000;
           DAY_IN_MS = HOUR_IN_MS * 24,
           current_day = JAN_FIRST.getTime(),
@@ -543,25 +547,25 @@
           window.scrollTo(0, 1);
         }
 
-        setInterval(refresh, 20000);      
+        setInterval(refresh, 20000);
       });
       
       function calc_summertime_offset (now) {
-        if (! DB[LOCATION][3]) return 0;
+        if (! DB[LOCATION][3]) return 0; // no summertime
         
         if (DB[LOCATION][0] < 0) { // southern hem
           return ((now < DST_START) || (now > DST_END)) ? 1 : 0;
         } else {
+          // console.log(now)
           return (now > DST_START && now < DST_END) ? 1 : 0;  
         }
       }
       
       function refresh() {
         // $('#example').height(Y * Y_SCALE).width(X * X_SCALE);
-        // alert()
         if (DB[LOCATION][3]){
-          DST_START = new Date ( SUNTIME[ DB[LOCATION][3] ][0] + " 2010" );
-          DST_END = new Date ( SUNTIME[ DB[LOCATION][3] ][1] + " 2010" );
+          DST_START = new Date ( SUNTIME[ DB[LOCATION][3] ][0] + " " + currentYear );
+          DST_END = new Date ( SUNTIME[ DB[LOCATION][3] ][1] + " " + currentYear );
         } else {
           DST_END = null;
           DST_START = null;
@@ -715,8 +719,8 @@
           }
         }
         
-        var summertime_offset = calc_summertime_offset(NOW);        
-        
+        var summertime_offset = calc_summertime_offset(NOW);
+
         var guessed_hours = box_hours(adjust_time_hack(NOW.getMinuteOfTheDay() / 60) + summertime_offset);
         
         var now_minutes_pos = Math.floor(guessed_hours * Y_SCALE);
@@ -735,7 +739,7 @@
         
         var sunrise = box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, true) + summertime_offset);
         var sunset  = box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, false) + summertime_offset);
-        var dawn    = box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, true, true)  + summertime_offset);
+        var dawn    = box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, true, true) + summertime_offset);
         var dusk    = box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, false, true) + summertime_offset);
         
 
@@ -1113,7 +1117,7 @@
         <a href="mailto:aboutthesun@sturob.com">Feedback</a>
       </div>
       <div id="copyright">
-        &copy; <a href="http://sturob.com/">Stuart Robinson</a> - 2010
+        &copy; <a href="http://sturob.com/">Stuart Robinson</a> - 2010-14
       </div>
       <!-- <div id="share">
             <div class="addthis_toolbox addthis_default_style">
