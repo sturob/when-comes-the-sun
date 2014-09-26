@@ -110,7 +110,6 @@ var PST = -8,
 var DB = {
 	// long, lat, time_offset, summerzone
 	"Europe": false,
-	
 	"Amsterdam, Netherlands":       [  52.22,    4.53,  CET,  1 ],
 	"Athens, Greece":               [  37.58,   23.43,  EET,  1 ],
 	"Barcelona, Spain":             [  41.23,    2.90,  CET,  1 ],
@@ -153,7 +152,6 @@ var DB = {
 	"Zurich, Switzerland":          [  47.21,    8.31,  CET,  1 ],
 
 	"North America": false,
-	
 	"Atlanta, USA":                 [  33.45,   84.23,  EST, 10 ],
 	"Boston, USA":                  [  42.21,   71.50,  EST, 10 ], 
 	"Calgary, Canada":              [  51.10,  114.10,  MST, 10 ],
@@ -192,7 +190,7 @@ var DB = {
 	"Istanbul, Turkey":             [  41.01,   28.58,  EET,  1 ],
 	"Mecca, Saudi Arabia":          [  21.29,   39.45,  AST,  0 ],
 	"Teheran, Iran":                [  35.45,   51.45,  IRT,  2 ],
-						
+
 	"Oceania": false,
 	"Adelaide, Australia":          [ -34.55,  138.36, ACST,  3 ],
 	"Auckland, New Zealand":        [ -36.52,  174.45, NZST,  4 ],
@@ -225,7 +223,6 @@ var DB = {
 	"Singapore, Singapore":         [   1.14,  103.55,    8 ],
 	"Seoul, South Korea":           [  37.33,  126.59,    9 ],
 	"Tokyo, Japan":                 [  35.40,  139.45,  JST ],
-		
 	
 	"South America": false,
 	"Bogota, Colombia":             [   4.32,  -74.15,   -5 ],
@@ -446,7 +443,6 @@ var JAN_FIRST = new Date(currentYear() + '/01/01'),
 		HOUR_IN_MS = 60 * 60 * 1000,
 		DAY_IN_MS = HOUR_IN_MS * 24;
 
-
 var ua = navigator.userAgent.toLowerCase();
 var TOUCH_INTERFACE = ((ua.indexOf('iphone')        != -1) ||
                        (ua.indexOf('ipod')          != -1) ||
@@ -455,10 +451,6 @@ var TOUCH_INTERFACE = ((ua.indexOf('iphone')        != -1) ||
                        (ua.indexOf('webos')         != -1) ||
                        (ua.indexOf('windows phone') != -1)
                       );
-
-
-
-
 
 
 $(window).ready(function () {
@@ -498,14 +490,13 @@ $(window).ready(function () {
 });
 
 
-
 function refresh() {
-	NOW = new Date();
 	var ll = Location.ll();
 
-	// work out where we our local timezone is
-	// var tmp = new Date();
-	// NOW = new Date( Date.now() + tmp.getTimezoneOffset() * 60 * 1000 ); // HACK
+	// work out what the time is at the selected location, even if we are not there
+	var dstMS = Location.dstOffset( new Date() ) * HOUR_IN_MS; // msecs of DST
+	var tzDiffMS = (new Date()).getTimezoneOffset() * 60 * 1000; // msecs difference
+	NOW = new Date( Date.now() + tzDiffMS + dstMS ); // HACK
 
 	cx.clearRect(0, 0, 1000, 1000);
 
@@ -631,11 +622,10 @@ var AxesToDraw = {
 		
 		var offset = Location.dstOffset( NOW );
 
-
 		// we try to figure out what the correct local time is for the location we're displaying
-		var guessed_hours = box_hours( adjust_time_hack( NOW.getHourFloatOfTheDay() ) + offset );
+		var guessed_hours = box_hours( adjust_time_hack( NOW.getHourFloatOfTheDay() ) );
 
-		var nowYPos = Math.floor( guessed_hours * Y_SCALE);
+		var nowYPos = Math.floor( guessed_hours * Y_SCALE );
 
 		AxesToDraw.suns( nowYPos );
 		
