@@ -475,7 +475,7 @@ $(window).ready(function () {
 
 	refresh();
 
-	var wait = (60 - NOW.getSeconds()) * 1000;
+	var wait = 200 + ((60 - NOW.getSeconds()) * 1000);
 	
 	setTimeout(
 		function() {
@@ -704,7 +704,7 @@ var Convert = {
 		var both = n.toString().split('.');
 		var mins = "0." + (both[1] || 0); // to denominator
 		mins *= 60; // to minutes
-		mins = Math.floor(mins);
+		mins = Math.round(mins);
 		mins += ""; // to string
 		return both[0] + ":" + ((mins.length == 2) ? mins : "0" + mins);
 	}
