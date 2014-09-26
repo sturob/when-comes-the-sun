@@ -174,9 +174,7 @@ var DB = {
 	"Toronto, Canada":              [  43.40,   79.24,  EST, 10 ],
 	"Vancouver, Canada":            [  49.13,  123.06,  PST, 10 ],
 	
-
 	"Africa": false,
-	
 	"Algiers, Algeria":             [  36.00,    3.00,  CET ],
 	"Cairo, Egypt":                 [  30.20,   31.21,  EET ],
 	"Cape Town, South Africa":      [ -33.55,   18.22,  SAST ],
@@ -188,8 +186,7 @@ var DB = {
 	"Lagos, Nigeria":               [   6.27,    3.23,  WAT ],
 	"Nairobi, Kenya":               [  -1.25,   36.55,  EAT ],
 	"Tripoli, Libya":               [  32.57,   13.12,  EET ],
-									
-									
+
 	"Middle East": false,
 	"Ankara, Turkey":               [  39.55,   32.55,  EET,  1 ],
 	"Istanbul, Turkey":             [  41.01,   28.58,  EET,  1 ],
@@ -197,7 +194,6 @@ var DB = {
 	"Teheran, Iran":                [  35.45,   51.45,  IRT,  2 ],
 						
 	"Oceania": false,
-																												 
 	"Adelaide, Australia":          [ -34.55,  138.36, ACST,  3 ],
 	"Auckland, New Zealand":        [ -36.52,  174.45, NZST,  4 ],
 	"Brisbane, Australia":          [ -27.29 , 153.80, AEST,  0 ],
@@ -207,9 +203,7 @@ var DB = {
 	"Sydney, Australia":            [  -34.0,  151.00, AEST,  3 ],
 	"Wellington, New Zealand":      [ -41.17,  174.47, NZST,  4 ],
 	
-	
 	"Asia": false,
-	
 	"Bangkok, Thailand":            [  13.45,  100.30,    7 ],
 	"Beijing, China":               [  39.55,  116.25, CNST ], 
 	"Calcutta, India":              [  22.34,   88.24,  IST ],
@@ -234,7 +228,6 @@ var DB = {
 		
 	
 	"South America": false,
-	
 	"Bogota, Colombia":             [   4.32,  -74.15,   -5 ],
 	"Buenos Aires, Argentina":      [ -34.35,  -58.22,  ART ],
 	"Caracas, Venezuela":           [  10.28,  -67.20, -4.5 ],
@@ -276,6 +269,9 @@ Date.prototype.getMinuteOfTheDay = function() {
 	return this.getHours() * 60 + this.getMinutes()
 }
 
+Date.prototype.getHourFloatOfTheDay = function() {
+	return this.getHours() + (this.getMinutes() / 60)
+}
 
 
 // -- *D ---
@@ -434,24 +430,25 @@ function adjust_time_hack(hours) {
 	return box_hours(tmp);
 }
 
-var currentYear = (new Date()).getFullYear();
+
+var cx;
 
 var X = 365,
 		Y = 24,
 		X_SCALE = 1,
-		Y_SCALE = 20,
-		JAN_FIRST = new Date(currentYear + '/01/01'),
-		HOUR_IN_MS = 60 * 60 * 1000;
-		DAY_IN_MS = HOUR_IN_MS * 24,
-		current_day = JAN_FIRST.getTime(),
-		NOW = (new Date()),
-		ROUGH_TWILIGHT_LENGTH = 0;
+		Y_SCALE = 20
 
-var cx;
+
+var NOW = new Date();
+var currentYear = function () { return NOW.getFullYear() }
+var JAN_FIRST = new Date(currentYear() + '/01/01'),
+		HOUR_IN_MS = 60 * 60 * 1000,
+		DAY_IN_MS = HOUR_IN_MS * 24;
+
 
 var ua = navigator.userAgent.toLowerCase();
 var TOUCH_INTERFACE = ((ua.indexOf('iphone')        != -1) ||
-                       (ua.indexOf('ipod')          != -1) || 
+                       (ua.indexOf('ipod')          != -1) ||
                        (ua.indexOf('ipad')          != -1) ||
                        (ua.indexOf('android')       != -1) ||
                        (ua.indexOf('webos')         != -1) ||
@@ -459,13 +456,74 @@ var TOUCH_INTERFACE = ((ua.indexOf('iphone')        != -1) ||
                       );
 
 
+
+
+
+
+$(window).ready(function () {
+	Location.set( $.cookie('CITY') || 'London, United Kingdom' );
+
+	if (TOUCH_INTERFACE) {
+		$('body').addClass('TOUCH');
+	}
+
+	var tmpString = '';
+	$.each(DB, function(city, ll) {
+			tmpString += ll ? "<span>" + city + "</span> " : '<hr><h2>' + city + '</h2>';
+	});
+	$('#cities').append( tmpString );
+
+	$('#cities span').click(function() {
+		var city = $(this).text();
+		$.cookie('CITY', city);
+		Location.set( city )
+		$('#cities').fadeOut();
+		refresh();
+	});
+
+	$('h1 a').click(function() {
+		$('#cities').toggle();
+	});
+
+	var example = document.getElementById('example');
+	cx = example.getContext('2d');
+
+	if (TOUCH_INTERFACE) {
+		window.scrollTo(0, 1);
+	}
+
+	refresh();
+	setInterval(refresh, 20000);
+});
+
+
+
+function refresh() {
+	NOW = new Date();
+	var ll = Location.ll();
+
+	cx.clearRect(0, 0, 1000, 1000);
+
+	cx.fillStyle = '#000014'; // background box
+	cx.fillRect(0, 0, 365, 480);
+
+	for (var x=0; x < X; x++) { // every day in the year
+		Day.setDOTY( x );
+		Day.draw( ll );
+	}
+
+	AxesToDraw.draw();
+}
+
+
 var Location = { // DB[] -> "Teheran, Iran": [  35.45,   51.45,  IRT,  2 ]
 	set: function(city) {
 		Location.current = city;
+		$('h1 span#location').html( Location.name() );
 
 		if (DB[ this.current ][3]) {
-			this.dstStart = new Date ( SUNTIME[ DB[Location.name()][3] ][0] + " " + currentYear );
-			this.dstEnd   = new Date ( SUNTIME[ DB[Location.name()][3] ][1] + " " + currentYear );
+			this.dstStart = new Date ( SUNTIME[ DB[Location.name()][3] ][0] + " " + currentYear() );
+			this.dstEnd   = new Date ( SUNTIME[ DB[Location.name()][3] ][1] + " " + currentYear() );
 		} else {
 			this.dstEnd = null;
 			this.dstStart = null;
@@ -497,135 +555,48 @@ var Location = { // DB[] -> "Teheran, Iran": [  35.45,   51.45,  IRT,  2 ]
 	}
 }
 
-Location.set( $.cookie('CITY') || 'London, United Kingdom' );
-
-
-
-$(window).ready(function () {
-	if (TOUCH_INTERFACE) {
-		$('body').addClass('TOUCH');
-	}
-
-	var tmpString = '';
-	$.each(DB, function(city, ll) {
-			tmpString += ll ? "<span>" + city + "</span> " : '<hr><h2>' + city + '</h2>';
-	});
-	$('#cities').append( tmpString );
-
-	$('#cities span').click(function() {
-		var city = $(this).text();
-		$.cookie('CITY', city);
-		Location.set( city )
-		$('#cities').fadeOut();
-		refresh();
-	});
-
-	$('h1 a').click(function() {
-		$('#cities').toggle();
-	});
-
-	var example = document.getElementById('example');
-	cx = example.getContext('2d');
-
-	if (TOUCH_INTERFACE) {
-		window.scrollTo(0, 1);
-	}
-
-	setInterval(refresh, 20000);
-});
-
-
-
-
-function refresh() {
-
-
-	var tmp = new Date();
-	NOW = new Date( Date.now() + tmp.getTimezoneOffset() * 60 * 1000 ); // HACK
-	
-	$('h1 span#location').html( Location.name() );
-	
-	cx.clearRect(0, 0, 1000, 1000);
-
-	cx.fillStyle = '#000014'; // background box
-	cx.fillRect(0, 0, 365, 480);
-
-	var ll = Location.ll();
-
-	for (var x=0; x < X; x++) { // every day in the year
-		Day.setX( x );
-		Day.draw( ll );
-	}
-
-	AxesToDraw.todayLine();
-	AxesToDraw.timeGrid();
-
-	var summertime_offset = Location.dstOffset(NOW);
-	var guessed_hours = box_hours(adjust_time_hack(NOW.getMinuteOfTheDay() / 60) + summertime_offset);
-	var now_minutes_pos = Math.floor(guessed_hours * Y_SCALE);
-
-	AxesToDraw.suns(now_minutes_pos);
-	
-	var boxed = {
-		sunrise : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, true) + summertime_offset),
-		sunset  : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, false) + summertime_offset),
-		dawn    : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, true, true) + summertime_offset),
-		dusk    : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, false, true) + summertime_offset)
-	};
-
-	AxesToDraw.horizonPassedBars(boxed);
-	AxesToDraw.text(boxed, guessed_hours, now_minutes_pos);
-
-	$( $('#months div').get(NOW.getMonth()) ).addClass('ACTIVE');
-} // end refresh
 
 
 var Day = {
-	setX: function(x) {
-		this.x = x;
+	setDOTY: function(x) {
+		this.doty = x;
 	},
 	draw: function(ll) {
-		var dayOfTheYear = JAN_FIRST.getTime() + (DAY_IN_MS * this.x);
+		var dayOfTheYear = JAN_FIRST.getTime() + (DAY_IN_MS * this.doty);
 		var dayAsDate = new Date(dayOfTheYear);
-
-		var timeOf = {
-			dawn:    CalculateSunriseOrSunset(ll.long, ll.lat, dayAsDate, true, true),
-			dusk:    CalculateSunriseOrSunset(ll.long, ll.lat, dayAsDate, false, true),
-			sunrise: CalculateSunriseOrSunset(ll.long, ll.lat, dayAsDate, true),
-			sunset:  CalculateSunriseOrSunset(ll.long, ll.lat, dayAsDate, false)
-		};
 		var offset = Location.dstOffset( dayAsDate );
-		timeOf.sunrise += offset;
-		timeOf.sunset += offset;
-		timeOf.dusk += offset;
-		timeOf.dawn += offset;
+		var timeOf = {
+			dawn:    CalculateSunriseOrSunset(ll.long, ll.lat, dayAsDate, true, true) + offset,
+			dusk:    CalculateSunriseOrSunset(ll.long, ll.lat, dayAsDate, false, true) + offset,
+			sunrise: CalculateSunriseOrSunset(ll.long, ll.lat, dayAsDate, true) + offset,
+			sunset:  CalculateSunriseOrSunset(ll.long, ll.lat, dayAsDate, false) + offset
+		};
 
+		Day.drawFullLight(timeOf);
 		if (ll.long < 58) {
 			Day.drawDawn(timeOf);
 			Day.drawDusk(timeOf);
 		}
-		Day.drawFullLight(timeOf);
 	},
 
-	drawFullLight: function(timeOf) {
-		// main daylight
+	drawFullLight: function(timeOf) { // main daylight
 		if (timeOf.sunrise) {
-			cx.fillRect(this.x * X_SCALE, timeOf.sunrise * Y_SCALE, X_SCALE, (timeOf.sunset - timeOf.sunrise) * Y_SCALE);
+			cx.fillStyle = 'rgb(240,240,240)';
+			cx.fillRect(this.doty * X_SCALE, timeOf.sunrise * Y_SCALE, X_SCALE, (timeOf.sunset - timeOf.sunrise) * Y_SCALE);
 		} else {
 		}
 	},
 	drawDawn: function(timeOf) { // dawn twilight
 		if (timeOf.sunrise && timeOf.dawn) {
 			var dawn_length = (timeOf.sunrise - timeOf.dawn) * Y_SCALE,
-			    dawn_pos = timeOf.dawn * Y_SCALE,
-			    ROUGH_TWILIGHT_LENGTH = dawn_length;
+			    dawn_pos = timeOf.dawn * Y_SCALE;
 
 			var dawngrad = cx.createLinearGradient(0, dawn_pos, 0, dawn_length + dawn_pos);  
 			    dawngrad.addColorStop(0, '#000028');  
 			    dawngrad.addColorStop(1.0, 'rgb(240,240,255)');  
 
 			cx.fillStyle = dawngrad;
-			cx.fillRect(this.x * X_SCALE, dawn_pos, X_SCALE, dawn_length + 1);
+			cx.fillRect(this.doty * X_SCALE, dawn_pos, X_SCALE, dawn_length + 1);
 		} else {
 			// ?
 		}
@@ -641,12 +612,35 @@ var Day = {
 			    duskgrad.addColorStop(0, 'rgb(240,240,255)');  
 
 			cx.fillStyle = duskgrad;
-			cx.fillRect(this.x * X_SCALE, (timeOf.sunset * Y_SCALE) - 1, X_SCALE, dusk_length);
+			cx.fillRect(this.doty * X_SCALE, (timeOf.sunset * Y_SCALE) - 1, X_SCALE, dusk_length);
 		}
 	}
 }
 
 var AxesToDraw = {
+
+	draw: function () {
+		var ll = Location.ll();
+		AxesToDraw.todayLine();
+		AxesToDraw.timeGrid();
+
+		var offset = Location.dstOffset( NOW );
+		var nowYPos = Math.floor(NOW.getHourFloatOfTheDay() * Y_SCALE);
+
+		AxesToDraw.suns(nowYPos);
+		
+		var boxed = {
+			sunrise : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, true) + offset),
+			sunset  : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, false) + offset),
+			dawn    : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, true, true) + offset),
+			dusk    : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, false, true) + offset)
+		};
+
+		AxesToDraw.horizonPassedBars( boxed );
+		AxesToDraw.text(boxed, NOW.getHourFloatOfTheDay(), nowYPos);
+
+		$( $('#months div').get(NOW.getMonth()) ).addClass('ACTIVE');
+	},
 	todayLine: function() {
 		cx.fillStyle = "rgba(150, 150, 0, 0.4)";
 		cx.fillRect(X_SCALE * NOW.getDayOfTheYear(), 1, 1, Y * Y_SCALE);
@@ -679,7 +673,7 @@ var AxesToDraw = {
 		cx.fillRect(X * X_SCALE, Math.floor(boxed.sunrise * Y_SCALE), 12, 1);
 		cx.fillRect(X * X_SCALE, Math.floor(boxed.sunset * Y_SCALE), 12, 1);
 	},
-	text: function(boxed, guessed_hours, now_minutes_pos) {
+	text: function(boxed, hoursN, yPos) {
 		$('#rise').css({ 
 			top: Math.floor(boxed.sunrise * Y_SCALE) - 8
 		}).find('span').text(Convert.n_to_hhmm(boxed.sunrise));
@@ -691,7 +685,7 @@ var AxesToDraw = {
 		$('#months span#date').text(NOW.getDate()).css({ left: NOW.getMonth() * 30 + 3 });
 		var currentTimeMarginLeft = NOW.getMonth() * 30;
 		currentTimeMarginLeft += NOW.getMonth() < 9 ? 92 : 24;
-		$('#times span').text(Convert.n_to_hhmm(guessed_hours)).css({ top: now_minutes_pos - 4, left: currentTimeMarginLeft });
+		$('#times span').text(Convert.n_to_hhmm(hoursN)).css({ top: yPos - 4, left: currentTimeMarginLeft });
 	}
 }
 
@@ -720,265 +714,232 @@ var Convert = {
 </script> 
 
 
-		<style type="text/css"> 
-			* {
-				margin: 0;
-				padding: 0;
-			}
-			
-			body {
-/*        font-family: Geneva;*/
-				font-family: Georgia;
-				background: #10102b;
-/*        padding: 24px 48px;*/
-				height: 100%;
-			}
-			
-			body.TOUCH {
-				height: 640px;
-			}
-			
-			h1 {
-				font-size: 24px;
-				position: absolute;
-				top: 24px;
-				width: 460px;
-				left: 50%;
-				margin-left: -235px;
-				text-align: center;
-				color: #fff;
-				font-weight: 100;
-				font-family: "Helvetica Neue";
-				letter-spacing: 2px;
-				z-index: 10;
-			}
-			
-			h1 a {
-				text-decoration: underline;
-				display: block;
-				color: #888;
-				margin-top: 2px;
-				font-size: 12px;
-				cursor: pointer;
-				
-			}
-			
-			h1 a:hover {
-				color: white !important;
-			}
-			
-			#cities {
-				font-weight: 100;
-				font-family: "Helvetica Neue";
-				letter-spacing: 3px;
-				display: none;
-				position: absolute;
-				top: 24px;
-/*        background:;*/
-				font-size: 14px;
-				margin: 24px 24px;
-				padding: 24px 24px;
-				background: rgba(0,0,0,0.8);
-				z-index: 1;
-				left: 0;
-				color: #ccc;
-				line-height: 1.4em;
-/*        word-spacing: -5px;*/
-/*        text-align: center;*/
-				
-			}
+<style type="text/css"> 
+	* {
+		margin: 0;
+		padding: 0;
+	}
+	
+	body {
+/*  font-family: Geneva;*/
+		font-family: Georgia;
+		background: #10102b;
+		height: 100%;
+	}
+	
+	body.TOUCH {
+		height: 640px;
+	}
+	
+	h1 {
+		font-size: 24px;
+		position: absolute;
+		top: 24px;
+		width: 460px;
+		left: 50%;
+		margin-left: -235px;
+		text-align: center;
+		color: #fff;
+		font-weight: 100;
+		font-family: "Helvetica Neue";
+		letter-spacing: 2px;
+		z-index: 10;
+	}
+	
+	h1 a {
+		text-decoration: underline;
+		display: block;
+		color: #888;
+		margin-top: 2px;
+		font-size: 12px;
+		cursor: pointer;
+	}
+	
+	h1 a:hover {
+		color: white !important;
+	}
+	
+	#cities {
+		font-weight: 100;
+		font-family: "Helvetica Neue";
+		letter-spacing: 3px;
+		display: none;
+		position: absolute;
+		top: 24px;
+		font-size: 14px;
+		margin: 24px 24px;
+		padding: 24px 24px;
+		background: rgba(0,0,0,0.8);
+		z-index: 1;
+		left: 0;
+		color: #ccc;
+		line-height: 1.4em;
+	}
 
-			#cities h2 {
-				display: inline;
-				font-size: 12px;
-				margin-top: 6px;
-				margin-right: 16px;
-			}
+	#cities h2 {
+		display: inline;
+		font-size: 12px;
+		margin-top: 6px;
+		margin-right: 16px;
+	}
 
-			hr {
-				display: block;
-				height: 8px;
-				visibility: hidden;
-/*        width: 100%;*/
-/*        background: red;*/
-			}
+	hr {
+		display: block;
+		height: 8px;
+		visibility: hidden;
+	}
 
-			#cities span {
-				margin-right: 12px;
-				letter-spacing: 1px;
-/*        display: block;*/
-/*        float: left;*/
-				white-space: nowrap;
-				font-size: 12px;
-				
-/*        border-bottom: 1px solid #999;*/
-/*          padding: 0 12px 0 12px;*/
-			}
+	#cities span {
+		margin-right: 12px;
+		letter-spacing: 1px;
+		white-space: nowrap;
+		font-size: 12px;
+	}
 
-			#cities span:hover {
-				color: white;
-				cursor: pointer;
-			}
+	#cities span:hover {
+		color: white;
+		cursor: pointer;
+	}
 
-			
-			div#main {
-				height: 481px;
-				position: relative;
-				top: 50%;
-				left: 0px;
-				width: 370px;
-				margin: -250px auto 0;
-			}
-			
-			body.TOUCH div#main {
-				margin-top: 36px;
-				top: 0px;
-			}
-			
-			canvas {
-				/*background: #000028;*/
-			}
-			
-			
-			#times {
-				position: absolute;
-				top: 5px;
-				left: -56px;
-				color: #446;
-/*        left: -6px;*/
-				font-size: 18px;
-				margin-top: -16px;
-				height: 400px;
-/*        overflow: hidden;*/
-			}
-			
-			#times div {
-				text-align: right;
-				height: 120px;
-			}
-			
-			#times span {
-				display: block;
-				text-align: right;
-/*        right: -296px;*/
-				margin-top: 6px;
-				left: 300px;
-/*        text-shadow: 1px 1px 2px #000;*/
-				color: #ff0;
-				font-size: 12px;
-				background: rgba(0,0,40, 0.8);
-/*        border: 1px solid #111;*/
-				padding: 1px 4px 2px 4px;
-/*        font-size: 15px;*/
-				-webkit-border-radius: 2px;
-				-moz-border-radius: 2px;
-				border-radius: 2px;
-				position: absolute;
-			}
-			
-			#months {
-				position: absolute;
-				bottom: -24px;
-				color: #446;
-/*        width: 730px;*/
-				vertical-align: middle;
-				padding-left: 2px;
-/*        overflow: hidden;*/
-				height: 24px;
-/*        outline: 1px solid red;*/
-			}
-			#months div {
-/*        background: black;*/
-				height: 24px;
-				padding-top: 6px;
-				font-size: 12px;
-				letter-spacing: -1px;
-				width: 30px;
-				text-align: center;
-				float: left;
-				text-transform: uppercase;
-			}
-			
-			#months div.ACTIVE {
-				color: #ddd;
-			}
-			
-			#months span {
-				position: absolute;
-				top: 14px;
-				left: 8px;
-/*        left: 280px; */
-				display: block;
-				width: 30px;
-				color: #eee;
-				text-align: center;
-/*        font-size: 11px;*/
-			}
-			
-			#sun {
-				font-size: 18px;
-				position: absolute;
-				top: -4px;
-				right: -12px;
-				color: #888;
-				text-transform: uppercase;
-			}
-			
-			#sun div {
-				width: 80px;
-/*        left: -10px;*/
-				position: absolute;
-			}
-			
-			#sun span {
-				margin: 0 4px;
-				color: #ccd;
-			}
+	div#main {
+		height: 481px;
+		position: relative;
+		top: 50%;
+		left: 0px;
+		width: 370px;
+		margin: -250px auto 0;
+	}
+	
+	body.TOUCH div#main {
+		margin-top: 36px;
+		top: 0px;
+	}
+	
+	canvas {
+	}
+	
+	#times {
+		position: absolute;
+		top: 5px;
+		left: -56px;
+		color: #446;
+		font-size: 18px;
+		margin-top: -16px;
+		height: 400px;
+	}
+	
+	#times div {
+		text-align: right;
+		height: 120px;
+	}
+	
+	#times span {
+		display: block;
+		text-align: right;
+		margin-top: 6px;
+		left: 300px;
+		color: #ff0;
+		font-size: 12px;
+		background: rgba(0,0,40, 0.8);
+		padding: 1px 4px 2px 4px;
+		-webkit-border-radius: 2px;
+		-moz-border-radius: 2px;
+		border-radius: 2px;
+		position: absolute;
+	}
+	
+	#months {
+		position: absolute;
+		bottom: -24px;
+		color: #446;
+		vertical-align: middle;
+		padding-left: 2px;
+		height: 24px;
+	}
+	#months div {
+		height: 24px;
+		padding-top: 6px;
+		font-size: 12px;
+		letter-spacing: -1px;
+		width: 30px;
+		text-align: center;
+		float: left;
+		text-transform: uppercase;
+	}
+	
+	#months div.ACTIVE {
+		color: #ddd;
+	}
+	
+	#months span {
+		position: absolute;
+		top: 14px;
+		left: 8px;
+		display: block;
+		width: 30px;
+		color: #eee;
+		text-align: center;
+	}
+	
+	#sun {
+		font-size: 18px;
+		position: absolute;
+		top: -4px;
+		right: -12px;
+		color: #888;
+		text-transform: uppercase;
+	}
+	
+	#sun div {
+		width: 80px;
+		position: absolute;
+	}
+	
+	#sun span {
+		margin: 0 4px;
+		color: #ccd;
+	}
 
-			#sun strong {
-				display: none;
-				font-weight: normal;
-				font-size: 12px;
-				color: #bbc;
-/*        text-decoration: line-through;*/
-			}      
-			
-			#contact {
-				position: absolute;
-				right: 24px;
-/*        top: 12px;*/
-			}
-			#about {
-				z-index: -1;
-				font-family: Helvetica Neue;
-				font-weight: 300;
-				position: absolute;
-				bottom: 12px;
-				left: 50%;
-				margin-left: -200px;
-				width: 400px;
-				text-align: center;
-				color: #446;
-				font-size: 10px;
-			}
-			
-			body.TOUCH #about {
-				position: relative;
-				bottom: -64px;
-			}
-			
-			a {
-				color: #446;
-			}
-		</style> 
+	#sun strong {
+		display: none;
+		font-weight: normal;
+		font-size: 12px;
+		color: #bbc;
+	}
+	
+	#contact {
+		position: absolute;
+		right: 24px;
+	}
+	#about {
+		z-index: -1;
+		font-family: Helvetica Neue;
+		font-weight: 300;
+		position: absolute;
+		bottom: 12px;
+		left: 50%;
+		margin-left: -200px;
+		width: 400px;
+		text-align: center;
+		color: #446;
+		font-size: 10px;
+	}
+	
+	body.TOUCH #about {
+		position: relative;
+		bottom: -64px;
+	}
+	
+	a {
+		color: #446;
+	}
+</style> 
 	</head> 
-	 
-	<body onload="refresh();"> 
-		
+
+	<body> 
 		<h1><span id="status"></span> <span id="location">London</span> <a>Change city</a></h1>
-		
-		<div id="cities">
-		</div>
+
+		<div id="cities"></div>
 		
 		<div id="main">
 			<canvas id="example" width="420" height="481">
@@ -1026,31 +987,21 @@ var Convert = {
 			<div id="copyright">
 				&copy; <a href="http://sturob.com/">Stuart Robinson</a> - 2010-14
 			</div>
-			<!-- <div id="share">
-						<div class="addthis_toolbox addthis_default_style">
-							<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
-							<a class="addthis_button_tweet"></a>
-							<a class="addthis_counter addthis_pill_style"></a>
-						</div>
-						<script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script>
-						<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=whencomesthesun"></script>
-					</div> -->
-			 
 		</div>
 		
-		<script type="text/javascript">
-		var clicky = { log: function(){ return; }, goal: function(){ return; }};
-		var clicky_site_id = 66392680;
-		(function() {
-			var s = document.createElement('script');
-			s.type = 'text/javascript';
-			s.async = true;
-			s.src = ( document.location.protocol == 'https:' ? 'https://static.getclicky.com/js' : 'http://static.getclicky.com/js' );
-			( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
-		})();
-		</script>
+<script type="text/javascript">
+	var clicky = { log: function(){ return; }, goal: function(){ return; }};
+	var clicky_site_id = 66392680;
+	(function() {
+		var s = document.createElement('script');
+		s.type = 'text/javascript';
+		s.async = true;
+		s.src = ( document.location.protocol == 'https:' ? 'https://static.getclicky.com/js' : 'http://static.getclicky.com/js' );
+		( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
+	})();
+</script>
+
 		<a title="Real Time Web Analytics" href="http://getclicky.com/66392680"></a>
 		<noscript><p><img alt="Clicky" width="1" height="1" src="http://in.getclicky.com/66392680ns.gif" /></p></noscript>
-		
-	</body> 
+	</body>
 </html>
