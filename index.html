@@ -13,7 +13,7 @@
 
 		<!-- // <script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script> -->
 		
-		<script type="text/javascript">
+<script type="text/javascript">
 
 /**
  * Get the value of a cookie with the given name.
@@ -30,45 +30,45 @@
  * @author Klaus Hartl/klaus.hartl@stilbuero.de
  */
 jQuery.cookie = function(name, value, options) {
-		if (typeof value != 'undefined') { // name and value given, set cookie
-				options = options || {};
-				if (value === null) {
-						value = '';
-						options.expires = -1;
-				}
-				var expires = '';
-				if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
-						var date;
-						if (typeof options.expires == 'number') {
-								date = new Date();
-								date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
-						} else {
-								date = options.expires;
-						}
-						expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
-				}
-				// CAUTION: Needed to parenthesize options.path and options.domain
-				// in the following expressions, otherwise they evaluate to undefined
-				// in the packed version for some reason...
-				var path = options.path ? '; path=' + (options.path) : '';
-				var domain = options.domain ? '; domain=' + (options.domain) : '';
-				var secure = options.secure ? '; secure' : '';
-				document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
-		} else { // only name given, get cookie
-				var cookieValue = null;
-				if (document.cookie && document.cookie != '') {
-						var cookies = document.cookie.split(';');
-						for (var i = 0; i < cookies.length; i++) {
-								var cookie = jQuery.trim(cookies[i]);
-								// Does this cookie string begin with the name we want?
-								if (cookie.substring(0, name.length + 1) == (name + '=')) {
-										cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-										break;
-								}
-						}
-				}
-				return cookieValue;
+	if (typeof value != 'undefined') { // name and value given, set cookie
+		options = options || {};
+		if (value === null) {
+			value = '';
+			options.expires = -1;
 		}
+		var expires = '';
+		if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
+			var date;
+			if (typeof options.expires == 'number') {
+				date = new Date();
+				date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
+			} else {
+				date = options.expires;
+			}
+			expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
+		}
+		// CAUTION: Needed to parenthesize options.path and options.domain
+		// in the following expressions, otherwise they evaluate to undefined
+		// in the packed version for some reason...
+		var path = options.path ? '; path=' + (options.path) : '';
+		var domain = options.domain ? '; domain=' + (options.domain) : '';
+		var secure = options.secure ? '; secure' : '';
+		document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
+  } else { // only name given, get cookie
+		var cookieValue = null;
+		if (document.cookie && document.cookie != '') {
+			var cookies = document.cookie.split(';');
+			for (var i = 0; i < cookies.length; i++) {
+				var cookie = jQuery.trim(cookies[i]);
+				// Does this cookie string begin with the name we want?
+				if (cookie.substring(0, name.length + 1) == (name + '=')) {
+					cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+					break;
+				}
+			}
+		}
+		return cookieValue;
+	}
 };
 
 
@@ -546,42 +546,19 @@ function refresh() {
 
 	var tmp = new Date();
 	NOW = new Date( Date.now() + tmp.getTimezoneOffset() * 60 * 1000 );
-	current_day = JAN_FIRST.getTime(),
 	
 	$('h1 span#location').html( Location.name() );
 	
 	cx.clearRect(0, 0, 1000, 1000);
 
-	cx.fillStyle = '#000014';
+	cx.fillStyle = '#000014'; // background box
 	cx.fillRect(0, 0, 365, 480);
 
 	var ll = Location.ll();
 
-	// every day in the year
-	for (var x=0; x < X; x++) {
-		// var day = new Day( x );
-		// day.draw();
-		var current_date = new Date(current_day);
-		var timeOf = {
-			dawn:    CalculateSunriseOrSunset(ll.long, ll.lat, current_date, true, true),
-			dusk:    CalculateSunriseOrSunset(ll.long, ll.lat, current_date, false, true),
-			sunrise: CalculateSunriseOrSunset(ll.long, ll.lat, current_date, true),
-			sunset:  CalculateSunriseOrSunset(ll.long, ll.lat, current_date, false)
-		};
-		var offset = calc_summertime_offset(current_date);
-		timeOf.sunrise += offset;
-		timeOf.sunset += offset;
-		timeOf.dusk += offset;
-		timeOf.dawn += offset;
-
-		Day.setX(x);
-		if (ll.long < 58) {
-			Day.drawDawn(timeOf);
-			Day.drawDusk(timeOf);
-		}
-		Day.drawFullLight(timeOf);
-
-		current_day += DAY_IN_MS;
+	for (var x=0; x < X; x++) { // every day in the year
+		Day.setX( x );
+		Day.draw( ll );
 	}
 
 	AxesToDraw.todayLine();
@@ -608,7 +585,32 @@ function refresh() {
 
 
 var Day = {
-	setX: function(x) { this.x = x },
+	setX: function(x) {
+		this.x = x;
+	},
+	draw: function(ll) {
+		var current_day = JAN_FIRST.getTime() + (DAY_IN_MS * this.x);
+		var current_date = new Date(current_day);
+
+		var timeOf = {
+			dawn:    CalculateSunriseOrSunset(ll.long, ll.lat, current_date, true, true),
+			dusk:    CalculateSunriseOrSunset(ll.long, ll.lat, current_date, false, true),
+			sunrise: CalculateSunriseOrSunset(ll.long, ll.lat, current_date, true),
+			sunset:  CalculateSunriseOrSunset(ll.long, ll.lat, current_date, false)
+		};
+		var offset = calc_summertime_offset(current_date);
+		timeOf.sunrise += offset;
+		timeOf.sunset += offset;
+		timeOf.dusk += offset;
+		timeOf.dawn += offset;
+
+		if (ll.long < 58) {
+			Day.drawDawn(timeOf);
+			Day.drawDusk(timeOf);
+		}
+		Day.drawFullLight(timeOf);
+	},
+
 	drawFullLight: function(timeOf) {
 		// main daylight
 		if (timeOf.sunrise) {
@@ -719,7 +721,8 @@ var Convert = {
 		return both[0] + ":" + ((mins.length == 2) ? mins : "0" + mins);
 	}
 }
-		</script> 
+</script> 
+
 
 		<style type="text/css"> 
 			* {
@@ -1015,7 +1018,7 @@ var Convert = {
 				<div>Sep</div>
 				<div>Oct</div>
 				<div>Nov</div>
-				<div>Dec</div>      
+				<div>Dec</div>
 				<span id="date"></span>
 			</div>
 		</div>
