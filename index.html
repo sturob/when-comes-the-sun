@@ -1,1096 +1,1091 @@
 
 <html> 
 <!-- <html manifest="/cache.manifest">  -->
-  <head> 
-    <title>When Comes the Sun</title> 
-
-    <meta name="viewport" content="width=480" />
-
-    <script type="text/javascript" src="js/jquery.1.4.4.min.js">    
-    </script>
-
-    <!--[if IE]><script type="text/javascript" src="js/excanvas.js"></script><![endif]-->
-
-
-    <!-- 
-      fb / tw / etc
-      interactive overlay
-      iphone/ipad optimised version - tap to show stuff
-      
-      add cities from analytics - dubai, jerusalum etc
-      
-      option to use detected ll + infer summertime from country
-      fix coordinates
-    -->
-
-    <!-- // <script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script> -->
-    
-    <script type="text/javascript">
-      /**
-       * Get the value of a cookie with the given name.
-       *
-       * @example $.cookie('the_cookie');
-       * @desc Get the value of a cookie.
-       *
-       * @param String name The name of the cookie.
-       * @return The value of the cookie.
-       * @type String
-       *
-       * @name $.cookie
-       * @cat Plugins/Cookie
-       * @author Klaus Hartl/klaus.hartl@stilbuero.de
-       */
-      jQuery.cookie = function(name, value, options) {
-          if (typeof value != 'undefined') { // name and value given, set cookie
-              options = options || {};
-              if (value === null) {
-                  value = '';
-                  options.expires = -1;
-              }
-              var expires = '';
-              if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
-                  var date;
-                  if (typeof options.expires == 'number') {
-                      date = new Date();
-                      date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
-                  } else {
-                      date = options.expires;
-                  }
-                  expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
-              }
-              // CAUTION: Needed to parenthesize options.path and options.domain
-              // in the following expressions, otherwise they evaluate to undefined
-              // in the packed version for some reason...
-              var path = options.path ? '; path=' + (options.path) : '';
-              var domain = options.domain ? '; domain=' + (options.domain) : '';
-              var secure = options.secure ? '; secure' : '';
-              document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
-          } else { // only name given, get cookie
-              var cookieValue = null;
-              if (document.cookie && document.cookie != '') {
-                  var cookies = document.cookie.split(';');
-                  for (var i = 0; i < cookies.length; i++) {
-                      var cookie = jQuery.trim(cookies[i]);
-                      // Does this cookie string begin with the name we want?
-                      if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                          break;
-                      }
-                  }
-              }
-              return cookieValue;
-          }
-      };
-      
-      
-      var SUNTIME = [
-        [], // no summertime
-        [ "28 March", "31 October" ], // europe
-        [ "22 March", "22 September" ], // iran
-        [ "4 April", "3 October" ], // australias
-        [ "4 April", "26 September"], // nz
-        [ "14 March", "31 October" ], // cuba
-        [ "4 April", "31 October" ], // mexico
-        [ "14 March",  "3 October" ], // uruguay
-        [ "21 February", "17 October" ],  // brazil
-        [ "4 April", "10 October" ],  // chile
-        [ "14 March", "7 November" ]  // US + canada
-      ];
-      
-      
-      var PST = -8,
-          MST = -7,
-          CST = -6,
-          EST = -5,
-          BRST = -3,
-          ART  = -3,
-          GMT  = 0,
-          CET  = 1,   // central europe
-          WAT = 1,    // west afr
-          EET  = 2,   // east europe
-          SAST = 2,   // s africa
-          EAT = 3,
-          MSD = 3,    // moscow
-          AST = 3,    // arabia
-          IRT = 3.5,  // iran
-          IST  = 5.5, // india
-          CNST  = 8,   // china
-          WST = 8,  // west aus
-          JST = 9,  // japan
-          ACST = 9.5, // aus central
-          AEST = 10,  // aus eastern
-          NZST = 12;
-          
-
-      var DB = {
-        // long, lat, time_offset, summerzone
-        "Europe": false,
-        
-        "Amsterdam, Netherlands":       [  52.22,    4.53,  CET,  1 ],
-        "Athens, Greece":               [  37.58,   23.43,  EET,  1 ],
-        "Barcelona, Spain":             [  41.23,    2.90,  CET,  1 ],
-        "Belfast, United Kingdom":      [  54.37,   -5.56,  GMT,  1 ],
-        "Belgrade, Serbia":             [  44.52,   20.32,  CET,  1 ],
-        "Brussels, Belgium":            [  50.52,    4.22,  CET,  1 ],
-        "Bucharest, Romania":           [  44.25,   26.70,  EET,  1 ],
-        "Budapest, Hungary":            [  47.30,   19.50,  CET,  1 ],
-        "Copenhagen, Denmark":          [  55.40,   12.34,  CET,  1 ],
-        "Dublin, Ireland":              [  53.20,   -6.15,  GMT,  1 ],
-        "Edinburgh, United Kingdom":    [  55.55,   -3.10,  GMT,  1 ],
-        "Frankfurt, Germany":           [   50.7,    8.41,  CET,  1 ],
-        "Glasgow, Scotland":            [  55.50,   -4.15,  GMT,  1 ],
-        "Hamburg, Germany":             [  53.33,   10.20,  CET,  1 ],
-        "Helsinki, Finland":            [  60.10,   25.00,  EET,  1 ],
-        "Lisbon, Portugal":             [  38.44,   -9.90,  GMT,  1 ],
-        "Liverpool, United Kingdom":    [  53.25,   -3.00,  GMT,  1 ],
-        "London, United Kingdom":       [  51.32,   -0.50,  GMT,  1 ],
-        "Lyons, France":                [  45.45,    4.50,  CET,  1 ],
-        "Kiev, Ukraine":                [  50.27,   30.31,  EET,  1 ],
-        "Madrid, Spain":                [  40.26,   -3.42,  CET,  1 ],
-        "Manchester, United Kingdom":   [  53.30,   -2.15,  GMT,  1 ],
-        "Marseilles, France":           [  43.20,    5.20,  CET,  1 ],
-        "Milan, Italy":                 [  45.27,    9.10,  CET,  1 ],
-        "Moscow, Russia":               [  55.45,   37.36,  MSD,  1 ],
-        "Munich, Germany":              [  48.8,    11.35,  CET,  1 ],
-        "Naples, Italy":                [  40.50,   14.15,  CET,  1 ], 
-        "Oslo, Norway":                 [  59.57,   10.42,  CET,  1 ],
-        "Paris, France":                [  48.48,    2.20,  CET,  1 ],
-        "Reykjavik, Iceland":           [  64.40,  -21.58,  GMT ],
-        "Sofia, Bulgaria":              [  42.40,   23.20,  EET,  1 ],
-        "Prague, Czech Republic":       [  50.50,   14.26,  CET,  1 ],
-        "Rome, Italy":                  [  41.54,   12.27,  CET,  1 ],
-        "St. Petersburg, Russia":       [  59.56,   30.18,  MSD,  1 ],
-        "Stockholm, Sweden":            [  59.17,   18.30,  CET,  1 ],
-        "Venice, Italy":                [  45.26,   12.20,  CET,  1 ],
-        "Vienna, Austria":              [  48.14,   16.20,  CET,  1 ],
-        "Vladivostok, Russia":          [  43.10,  132.00,   10,  1 ],
-        "Warsaw, Poland":               [  52.14,   21.00,  CET,  1 ],
-        "Zurich, Switzerland":          [  47.21,    8.31,  CET,  1 ],
-
-        "North America": false,
-        
-        "Atlanta, USA":                 [  33.45,   84.23,  EST, 10 ],
-        "Boston, USA":                  [  42.21,   71.50,  EST, 10 ], 
-        "Calgary, Canada":              [  51.10,  114.10,  MST, 10 ],
-        "Chicago, USA":                 [  41.50,   87.37,  CST, 10 ], 
-        "Columbus, USA":                [  34.00, 	81.20,  EST, 10 ],
-        "Dallas, USA":                  [  32.46,	  96.46,  CST, 10 ],
-        "Detroit, USA":                 [  42.20,	  83.30,  EST, 10 ],
-        "Houston, USA":                 [  29.45,	  95.21,  CST, 10 ],
-        "Los Angeles, USA":             [  34.30,	 118.15,  PST, 10 ],
-        "Mexico City, Mexico":          [  19.26,  -99.70,  CST,  6 ],
-        "New York City, USA":           [  40.47,   73.58,  EST, 10 ],
-        "New Orleans, USA":             [  29.57,	  90.40,  CST, 10 ],
-        "Philadelphia, USA":            [  39.57,	  75.10,  EST, 10 ],
-        "Phoenix, USA":                 [  33.29,	 112.40,  MST,  0 ],
-        "San Diego, USA":               [  32.42,	 117.10,  PST, 10 ],
-        "San Francisco, USA":           [  37.47,	 122.26,  PST, 10 ],
-        "Seattle, USA":                 [  47.37,	 122.20,  PST, 10 ],
-        "Toronto, Canada":              [  43.40,   79.24,  EST, 10 ],
-        "Vancouver, Canada":            [  49.13,  123.06,  PST, 10 ],
-        
-
-        "Africa": false,
-        
-        "Algiers, Algeria":             [  36.00,    3.00,  CET ],
-        "Cairo, Egypt":                 [  30.20,   31.21,  EET ],
-        "Cape Town, South Africa":      [ -33.55,   18.22,  SAST ],
-        "Dakar, Senegal":               [  14.40,  -17.28,  GMT ],
-        "Djibouti, Djibouti":           [  11.30,   43.30,  EAT ],
-        "Durban, South Africa":         [ -29.53,   30.53,  SAST ],
-        "Johannesburg, South Africa":   [ -26.12,   28.40,  SAST ],
-        "Kinshasa, Congo":              [  -4.18,   15.17,  WAT ],
-        "Lagos, Nigeria":               [   6.27,    3.23,  WAT ],
-        "Nairobi, Kenya":               [  -1.25,   36.55,  EAT ],
-        "Tripoli, Libya":               [  32.57,   13.12,  EET ],
-                        
-                        
-        "Middle East": false,
-        "Ankara, Turkey":               [  39.55,   32.55,  EET,  1 ],
-        "Istanbul, Turkey":             [  41.01,   28.58,  EET,  1 ],
-        "Mecca, Saudi Arabia":          [  21.29,   39.45,  AST,  0 ],
-        "Teheran, Iran":                [  35.45,   51.45,  IRT,  2 ],
-                  
-        "Oceania": false,
-                                                               
-        "Adelaide, Australia":          [ -34.55,  138.36, ACST,  3 ],
-        "Auckland, New Zealand":        [ -36.52,  174.45, NZST,  4 ],
-        "Brisbane, Australia":          [ -27.29 , 153.80, AEST,  0 ],
-        "Darwin, Australia":            [ -12.28,  130.51, ACST,  0 ],
-        "Melbourne, Australia":         [ -37.47 , 144.58, AEST,  3 ],
-        "Perth, Australia":             [ -31.57 , 115.52, WST ,  0 ],
-        "Sydney, Australia":            [  -34.0,  151.00, AEST,  3 ],
-        "Wellington, New Zealand":      [ -41.17,  174.47, NZST,  4 ],
-        
-        
-        "Asia": false,
-        
-        "Bangkok, Thailand":            [  13.45,  100.30,    7 ],
-        "Beijing, China":               [  39.55,  116.25, CNST ], 
-        "Calcutta, India":              [  22.34,   88.24,  IST ],
-        "Canton, China":                [  23.70,  113.15, CNST ],
-        "Chongqing, China":             [  29.46,  106.34, CNST ],
-        "Hong Kong, China":             [  22.20,  114.11, CNST ],
-        "Jakarta, Indonesia":           [  -6.16,  106.48,    7 ],
-        "Kuala Lumpur, Malaysia":       [   3.80,  101.42,    8 ],
-        "Manila, Philippines":          [  14.35,  120.57,    8 ],
-        "Mumbai, India":                [  19.00,   72.48,  IST ],
-        "Nagasaki, Japan":              [  32.48,  129.57,  JST ],
-        "Nagoya, Japan":                [  35.7,   136.56,  JST ],
-        "Nanjing, China":               [  32.3,   118.53, CNST ],
-        "New Delhi, India":             [  28.35,   77.12,  IST ],
-        "Osaka, Japan":                 [  34.32,  135.30,  JST ],
-     "Port Moresby, Papua New Guinea":  [  -9.25,  147.80,   10 ],
-        "Rangoon, Myanmar":             [  16.50,   96.00,  6.5 ],
-        "Shanghai, China":              [  31.10,  121.28, CNST ],
-        "Singapore, Singapore":         [   1.14,  103.55,    8 ],
-        "Seoul, South Korea":           [  37.33,  126.59,    9 ],
-        "Tokyo, Japan":                 [  35.40,  139.45,  JST ],
-          
-        
-        "South America": false,
-        
-        "Bogota, Colombia":             [   4.32,  -74.15,   -5 ],
-        "Buenos Aires, Argentina":      [ -34.35,  -58.22,  ART ],
-        "Caracas, Venezuela":           [  10.28,  -67.20, -4.5 ],
-        "Cayenne, French Guiana":       [   4.49,  -52.18,   -3 ],
-        "Cordoba, Argentina":           [ -31.28,  -64.10,  ART ],
-        "Georgetown, Guyana":           [   6.45,  -58.15,   -4 ],
-        "Guatemala City, Guatemala":    [  14.37,  -90.31,  CST ],
-        "Guayaquil, Ecuador":           [  -2.10,  -79.56,   -5 ],
-        "Havana, Cuba":                 [  23.80,  -82.23,   -5,  5 ],
-        "Kingston, Jamaica":            [  17.59,  -76.49,   -5 ],
-        "La Paz, Bolivia":              [ -16.27,  -68.22,   -4 ],
-        "Lima, Peru":                   [ -12.00,  -77.20,   -5 ],
-        "Montevideo, Uruguay":          [ -34.53,  -56.10,   -3,  7 ],
-        "Panama City, Panama":          [   8.58,  -79.32,  EST ],
-        "Paramaribo, Suriname":         [   5.45,  -55.15,   -3 ],
-        "Rio de Janeiro, Brazil":       [ -22.57,  -43.12, BRST,  8 ],
-        "Salvador, Brazil":             [ -12.56 , -38.27, BRST,  0 ],
-        "Santiago, Chile":              [ -33.28,  -70.45,   -4,  9 ],
-        "Sao Paulo, Brazil":            [ -23.31,  -46.31, BRST,  8 ]
-        
-      };
-
-      var DESCRIPTION = {
-        predawn: "Dawn approaches ",
-        dawn: "Day breaks over ",
-        morning: "Morning has broken in ",
-        day: "The sun hangs over ",
-        evening: "The sun tires in ",
-        dusk: "Night descends on ",
-        night: "Darkness reigns in ",
-        twilight: "Twilight hangs over "
-      };
-      
-      Date.prototype.getDayOfTheYear = function() {
-        var onejan = new Date(this.getFullYear(),0,1);
-        return Math.ceil((this - onejan) / 86400000);
-      }
-      
-      Date.prototype.getMinuteOfTheDay = function() {
-        return this.getHours() * 60 + this.getMinutes()
-      }
-      
-      
-      
-      // -- *D ---
-      //
-      // These trigonometry functions use degrees instead of radians.
-      //
-      function sinD(n)  { return Math.sin (n * 0.0174532925199433); }
-      function cosD(n)  { return Math.cos (n * 0.0174532925199433); }
-      function tanD(n)  { return Math.tan (n * 0.0174532925199433); }
-      function asinD(n) { return Math.asin(n) * 57.2957795130823;   }
-      function acosD(n) { return Math.acos(n) * 57.2957795130823;   }
-      function atanD(n) { return Math.atan(n) * 57.2957795130823;   }
-
-
-      function Int(n) { return n < 0 ? Math.ceil(n) : Math.floor(n); }
-      function Sign(n) { if (n < 0) return -1; if (n > 0) return 1; return 0; }
-
-
-      // -- isNull --
-      //
-      // Determines whether an object is null.
-      //
-      function isNull(anObject)
-      {
-          return typeof anObject == "object" && !anObject;
-      }
-
-
-      // --- CalculateSunriseOrSunset ---
-      //
-      // Calculates the time of sunrise or sunset at a given location on a given day.
-      //
-      // Parameters
-      //    latitude - latitude in degrees of location
-      //   longitude - longitude in degrees of location
-      //        date - Date object - day to calculate
-      //     sunrise - Boolean - whether to calculate sunrise (true) or sunset (false)
-      //    twilight - Boolean - whether to calculate twilight (true) or sunrise/sunset (false)
-      //
-      // Returns
-      //   floating-point hour of sun event in UTC
-      //     (e.g., 5.15 => 0509Z), or null if the event doesn't occur on the given day
-      //
-      function CalculateSunriseOrSunset(latitude, longitude, date, sunrise, twilight)
-      {
-          // Source:
-          //   Almanac for Computers, 1990
-          //   published by Nautical Almanac Office
-          //   United States Naval Observatory
-          //   Washington, DC 20392
-
-          day   = date.getDate();
-          month = date.getMonth() + 1;
-          year  = date.getFullYear();
-
-          var zenith;
-
-          if (twilight)
-          {
-              // twilightSelect = document.getElementById('twilight');
-              // zenith = twilightSelect.value;
-
-              // <option id="civilOption" value="96" selected></option>
-              // <option id="nauticalOption" value="102"></option>
-              // <option id="astronomicalOption" value="108"></option>
-              zenith = 99;
-          }
-          else
-              zenith = 90.8333333333;
-
-
-          // Calculate the day of the year.
-
-          N1 = Math.floor(275.0 * month / 9.0);
-          N2 = Math.floor((month + 9.0) / 12.0);
-          N3 = 1.0 + Math.floor((year - 4.0 * Math.floor(year / 4.0) + 2.0) / 3.0);
-          N = N1 - (N2 * N3) + day - 30.0;
-
-
-          // Convert the longitude to hour value and calculate an approximate time.
-
-          lngHour = longitude / 15.0;
-
-          if (sunrise)
-              t = N + ((6.0 - lngHour) / 24.0);
-          else
-              t = N + ((18.0 - lngHour) / 24.0)
-
-
-          // Calculate the sun's mean anomaly.
-
-          M = (0.9856 * t) - 3.289;
-
-
-          // Calculate the sun's true longitude.
-
-          L = M + (1.916 * sinD(M)) + (0.020 * sinD(2 * M)) + 282.634;
-
-          while (L >= 360) L -= 360.0;
-          while (L <  0)   L += 360.0;
-
-
-          // Caculate the sun's right ascension.
-
-          RA = atanD(0.91764 * tanD(L));
-
-          while (RA >= 360) RA -= 360.0;
-          while (RA <  0)   RA += 360.0;
-
-
-          // Right ascension value needs to be in the same quadrant as L.
-
-          Lquadrant = Math.floor(L / 90.0) * 90.0;
-          RAquadrant = Math.floor(RA / 90.0) * 90.0;
-          RA = RA + (Lquadrant - RAquadrant);
-
-
-          // Right ascension value needs to be converted into hours.
-
-          RA /= 15.0;
-
-
-          // Calculate the sun's declination.
-
-          sinDec = 0.39782 * sinD(L);
-          cosDec = cosD(asinD(sinDec));
-
-
-          // Calculate the sun's local hour angle.
-
-          cosH = (cosD(zenith) - (sinDec * sinD(latitude))) / (cosDec * cosD(latitude));
-
-          if (sunrise)
-          {
-              if (cosH > 1) return null;
-          }
-          else
-          {
-              if (cosH < -1) return null;
-          }
-
-
-          // Finish calculating H and convert into hours.
-
-          if (sunrise)
-              H = 360.0 - acosD(cosH);
-          else
-              H = acosD(cosH);
-
-          H /= 15.0
-
-
-          // Calculate local mean time of rising.
-
-          T = H + RA - (0.06571 * t) - 6.622;
-
-
-          // Adjust back to UTC.
-
-          // we want local time
-          UT = T; // - lngHour;
-
-          // UT += Math.ceil(longitude / 15);
-          
-          // UT -= DB[LOCATION][2];
-
-
-          // while (UT >= 24) UT -= 24.0;
-          // while (UT <  0)  UT += 24.0;
-
-          return box_hours(UT);
-      }
-      
-      // 
-      function adjust_time_hack(hours) {
-        var tmp = hours + DB[LOCATION][2];
-        
-        return box_hours(tmp);
-      }
-      
-      function box_hours (tmp) {
-         while (tmp >= 24) tmp -= 24.0;
-          while (tmp <  0)  tmp += 24.0;
-          return tmp;
-      }
-      
-      var loc_string = 'London, United Kingdom';
-      
-      if (false && geo) {
-        loc_string = geo.ll[2].city + ', ' + geo.ll[2].country;
-        if (! DB[loc_string] ) {
-          loc_string = false;
-        }
-      }
-
-
-      var currentYear = (new Date()).getFullYear();
-      
-      var LOCATION = $.cookie('CITY') || loc_string,
-          X = 365,
-          Y = 24,
-          X_SCALE = 1,
-          Y_SCALE = 20,
-          JAN_FIRST = new Date(currentYear + '/01/01'),
-          HOUR_IN_MS = 60 * 60 * 1000;
-          DAY_IN_MS = HOUR_IN_MS * 24,
-          current_day = JAN_FIRST.getTime(),
-          LONG = DB[LOCATION][0],
-          LAT = DB[LOCATION][1],
-          NOW = (new Date()),
-          ROUGH_TWILIGHT_LENGTH = 0;
-
-      var DST_START, DST_END;
-        
-      var ua = navigator.userAgent.toLowerCase();
-      var TOUCH_INTERFACE = ((ua.indexOf('iphone')        != -1) ||
-                             (ua.indexOf('ipod')          != -1) || 
-                             (ua.indexOf('ipad')          != -1) ||
-                             (ua.indexOf('android')       != -1) ||
-                             (ua.indexOf('webos')         != -1) ||
-                             (ua.indexOf('windows phone') != -1)
-                            );
-
-
-
-
-      function calc_summertime_offset (now) {
-        if (! DB[LOCATION][3]) return 0; // no summertime
-        
-        if (DB[LOCATION][0] < 0) { // southern hem
-          return ((now < DST_START) || (now > DST_END)) ? 1 : 0;
-        } else {
-          return (now > DST_START && now < DST_END) ? 1 : 0;  
-        }
-      }
-
-
-      $(window).ready(function () {
-        
-        if (TOUCH_INTERFACE) {
-          $('body').addClass('TOUCH');
-        }
-        
-        $.each(DB, function(city, ll) {
-          if (ll) {
-            $('#cities').append("<span>" + city + "</span> ");
-          } else {
-            $('#cities').append('<hr><h2>' + city + '</h2>');
-          }
-        });
-      
-        $('#cities span').click(function() {
-          var city = $(this).text();
-          $.cookie('CITY', city);
-          LOCATION = city;
-          LONG = DB[city][0];
-          LAT = DB[city][1];
-          $('#cities').fadeOut();
-          refresh();
-        });
-      
-        $('h1 a').click(function() {
-          $('#cities').toggle();
-        });
-
-        if (TOUCH_INTERFACE) {
-          window.scrollTo(0, 1);
-        }
-
-        setInterval(refresh, 20000);
-      });
-
-
-
-      var cx;
-
-      function refresh() {
-        if (DB[LOCATION][3]) {
-          DST_START = new Date ( SUNTIME[ DB[LOCATION][3] ][0] + " " + currentYear );
-          DST_END = new Date ( SUNTIME[ DB[LOCATION][3] ][1] + " " + currentYear );
-        } else {
-          DST_END = null;
-          DST_START = null;
-        }
-        
-        var tmp = new Date();
-        NOW = new Date( Date.now() + tmp.getTimezoneOffset() * 60 * 1000 );
-        current_day = JAN_FIRST.getTime(),
-        
-        $('h1 span#location').html( LOCATION );
-        
-        var example = document.getElementById('example');
-        cx = example.getContext('2d');
-        cx.clearRect (0, 0, 1000, 1000);
-
-        cx.fillStyle = '#000014';
-        cx.fillRect(0, 0, 365, 480);
-      
-        // every day in the year
-        for (var x=0; x < X; x++) {
-          var current_date = new Date(current_day);
-          
-          var timeOf = {
-            dawn:    CalculateSunriseOrSunset(LONG, LAT, current_date, true, true),
-            dusk:    CalculateSunriseOrSunset(LONG, LAT, current_date, false, true),
-            sunrise: CalculateSunriseOrSunset(LONG, LAT, current_date, true),
-            sunset:  CalculateSunriseOrSunset(LONG, LAT, current_date, false)
-          };
-          
-          var offset = calc_summertime_offset(current_date);
-          timeOf.sunrise += offset;
-          timeOf.sunset += offset;
-          timeOf.dusk += offset;
-          timeOf.dawn += offset;
-          
-          cx.fillStyle = "rgb(240, 240, 255)";
-
-          Day.setX(x);
-          if (LONG < 58) {
-            Day.drawDawn(timeOf);
-            Day.drawDusk(timeOf);
-          }
-          Day.drawFullLight(timeOf);
-
-          current_day += DAY_IN_MS;
-        }
-
-        AxesToDraw.todayLine();
-        AxesToDraw.timeGrid();
-
-        var summertime_offset = calc_summertime_offset(NOW);
-        var guessed_hours = box_hours(adjust_time_hack(NOW.getMinuteOfTheDay() / 60) + summertime_offset);
-        var now_minutes_pos = Math.floor(guessed_hours * Y_SCALE);
-
-        AxesToDraw.suns(now_minutes_pos);
-        
-        var boxed = {
-          sunrise : box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, true) + summertime_offset),
-          sunset  : box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, false) + summertime_offset),
-          dawn    : box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, true, true) + summertime_offset),
-          dusk    : box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, false, true) + summertime_offset)
-        };
-
-        AxesToDraw.horizonPassedBars(boxed);
-        AxesToDraw.text(boxed, guessed_hours, now_minutes_pos);
-
-        $( $('#months div').get(NOW.getMonth()) ).addClass('ACTIVE');
-      } // end refresh
-
-
-
-
-      var Day = {
-        setX: function(x) { this.x = x },
-        drawFullLight: function(timeOf) {
-          // main daylight
-          if (timeOf.sunrise) {
-            cx.fillRect(this.x * X_SCALE, timeOf.sunrise * Y_SCALE, X_SCALE, (timeOf.sunset - timeOf.sunrise) * Y_SCALE);
-          } else {
-          }
-        },
-        drawDawn: function(timeOf) { // dawn twilight
-          if (timeOf.sunrise && timeOf.dawn) {
-            var dawn_length = (timeOf.sunrise - timeOf.dawn) * Y_SCALE,
-                dawn_pos = timeOf.dawn * Y_SCALE,          
-                ROUGH_TWILIGHT_LENGTH = dawn_length;
-      
-            var dawngrad = cx.createLinearGradient(0, dawn_pos, 0, dawn_length + dawn_pos);  
-                dawngrad.addColorStop(0, '#000028');  
-                dawngrad.addColorStop(1.0, 'rgb(240,240,255)');  
-
-            cx.fillStyle = dawngrad;
-            cx.fillRect(this.x * X_SCALE, dawn_pos, X_SCALE, dawn_length + 1);
-          } else {
-            // ?
-          }
-        },
-        drawDusk: function(timeOf) {
-          // dusk twilight
-          if (timeOf.sunset && timeOf.dusk) {
-            var dusk_length = (timeOf.dusk - timeOf.sunset) * Y_SCALE,
-                dusk_pos = timeOf.dusk * Y_SCALE;
-        
-            var duskgrad = cx.createLinearGradient(0, timeOf.sunset * Y_SCALE, 0, dusk_pos);  
-                duskgrad.addColorStop(1, '#000028');  
-                duskgrad.addColorStop(0, 'rgb(240,240,255)');  
-
-            cx.fillStyle = duskgrad;
-            cx.fillRect(this.x * X_SCALE, (timeOf.sunset * Y_SCALE) - 1, X_SCALE, dusk_length);
-          }
-        }
-      }
-
-      var AxesToDraw = {
-        todayLine: function() {
-          cx.fillStyle = "rgba(150, 150, 0, 0.4)";
-          cx.fillRect(X_SCALE * NOW.getDayOfTheYear(), 1, 1, Y * Y_SCALE);
-        },
-        timeGrid: function() {
-          cx.fillStyle = "rgba(180, 180, 180, 0.2)";
-          for (var i = 0; i < 25; ++i) {
-            if (i % 6 == 0) { 
-              cx.fillRect(0, i * Y_SCALE, X * X_SCALE, 1);
-            }
-          }
-        },
-        suns: function(y) {
-          // sun right aligned
-          cx.fillStyle = "rgba(255,255,0,1)";
-          cx.fillRect(X_SCALE * X - 1, y, X_SCALE, 1);
-          // the sun square
-          cx.fillStyle = "rgba(0,0,0,0.5)";
-          cx.fillRect(X_SCALE * NOW.getDayOfTheYear() - 2, y - 2, 5, 5); 
-          cx.fillStyle = "rgb(255,255,0)";
-          cx.fillRect(X_SCALE * NOW.getDayOfTheYear() - 1, y - 1, 3, 3);
-        },
-        horizonPassedBars: function(boxed) {
-          // sun rise + set horizontals
-          cx.fillStyle = "rgba(130,130,100,1)";
-          cx.fillRect(NOW.getDayOfTheYear() - 5, Math.floor(boxed.sunrise * Y_SCALE), 12, 1);
-          cx.fillRect(NOW.getDayOfTheYear() - 5, Math.floor(boxed.sunset * Y_SCALE), 12, 1);
-          
-          cx.fillStyle = "rgba(150,150,150,1)";
-          cx.fillRect(X * X_SCALE, Math.floor(boxed.sunrise * Y_SCALE), 12, 1);
-          cx.fillRect(X * X_SCALE, Math.floor(boxed.sunset * Y_SCALE), 12, 1);
-        },
-        text: function(boxed, guessed_hours, now_minutes_pos) {
-          $('#rise').css({ 
-            top: Math.floor(boxed.sunrise * Y_SCALE) - 8
-          }).find('span').text(Convert.n_to_hhmm(boxed.sunrise));
-          
-          $('#set').css({
-             top: Math.floor(boxed.sunset * Y_SCALE) - 8 
-          }).find('span').text(Convert.n_to_hhmm(boxed.sunset));
-
-          // 
-          $('#months span#date').text(NOW.getDate()).css({ left: NOW.getMonth() * 30 + 3 });
-          var currentTimeMarginLeft = NOW.getMonth() * 30;
-          currentTimeMarginLeft += NOW.getMonth() < 9 ? 92 : 24;
-          $('#times span').text(Convert.n_to_hhmm(guessed_hours)).css({ top: now_minutes_pos - 4, left: currentTimeMarginLeft });
-        }
-      }
-
-      var Convert = {
-        time_to_n: function(t) {
-          return t.getHours() +  (t.getMinutes() / 60)
-        },
-        n_to_time: function (n) {
-          return new Date(HOUR_IN_MS * n);
-        },
-        time_to_hhmm: function(t) {
-          var mins = t.getMinutes() + "";
-          if (mins.length == 1) { mins = "0" + mins; }
-          
-          return t.getHours() + ":" + mins;
-        },
-        n_to_hhmm: function(n) {
-          var both = n.toString().split('.');
-          var mins = "0." + (both[1] || 0); // to denominator
-          mins *= 60; // to minutes
-          mins = Math.floor(mins);
-          mins += ""; // to string
-          return both[0] + ":" + ((mins.length == 2) ? mins : "0" + mins);
-        }
-      }
-
-    </script> 
-
-    <style type="text/css"> 
-      * {
-        margin: 0;
-        padding: 0;
-      }
-      
-      body {
+	<head> 
+		<title>When Comes the Sun</title> 
+
+		<meta name="viewport" content="width=480" />
+
+		<script type="text/javascript" src="js/jquery.1.4.4.min.js"></script>
+
+		<!--[if IE]><script type="text/javascript" src="js/excanvas.js"></script><![endif]-->
+
+		<!-- 
+			fb / tw / etc
+			interactive overlay
+			iphone/ipad optimised version - tap to show stuff
+			
+			add cities from analytics - dubai, jerusalum etc
+			
+			option to use detected ll + infer summertime from country
+			fix coordinates
+		-->
+
+		<!-- // <script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script> -->
+		
+		<script type="text/javascript">
+
+/**
+ * Get the value of a cookie with the given name.
+ *
+ * @example $.cookie('the_cookie');
+ * @desc Get the value of a cookie.
+ *
+ * @param String name The name of the cookie.
+ * @return The value of the cookie.
+ * @type String
+ *
+ * @name $.cookie
+ * @cat Plugins/Cookie
+ * @author Klaus Hartl/klaus.hartl@stilbuero.de
+ */
+jQuery.cookie = function(name, value, options) {
+		if (typeof value != 'undefined') { // name and value given, set cookie
+				options = options || {};
+				if (value === null) {
+						value = '';
+						options.expires = -1;
+				}
+				var expires = '';
+				if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
+						var date;
+						if (typeof options.expires == 'number') {
+								date = new Date();
+								date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
+						} else {
+								date = options.expires;
+						}
+						expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
+				}
+				// CAUTION: Needed to parenthesize options.path and options.domain
+				// in the following expressions, otherwise they evaluate to undefined
+				// in the packed version for some reason...
+				var path = options.path ? '; path=' + (options.path) : '';
+				var domain = options.domain ? '; domain=' + (options.domain) : '';
+				var secure = options.secure ? '; secure' : '';
+				document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
+		} else { // only name given, get cookie
+				var cookieValue = null;
+				if (document.cookie && document.cookie != '') {
+						var cookies = document.cookie.split(';');
+						for (var i = 0; i < cookies.length; i++) {
+								var cookie = jQuery.trim(cookies[i]);
+								// Does this cookie string begin with the name we want?
+								if (cookie.substring(0, name.length + 1) == (name + '=')) {
+										cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+										break;
+								}
+						}
+				}
+				return cookieValue;
+		}
+};
+
+
+var SUNTIME = [
+	[], // no summertime
+	[ "28 March", "31 October" ], // europe
+	[ "22 March", "22 September" ], // iran
+	[ "4 April", "3 October" ], // australias
+	[ "4 April", "26 September"], // nz
+	[ "14 March", "31 October" ], // cuba
+	[ "4 April", "31 October" ], // mexico
+	[ "14 March",  "3 October" ], // uruguay
+	[ "21 February", "17 October" ],  // brazil
+	[ "4 April", "10 October" ],  // chile
+	[ "14 March", "7 November" ]  // US + canada
+];
+
+var PST = -8,
+    MST = -7,
+    CST = -6,
+    EST = -5,
+    BRST = -3,
+    ART  = -3,
+    GMT  = 0,
+    CET  = 1,   // central europe
+    WAT = 1,    // west afr
+    EET  = 2,   // east europe
+    SAST = 2,   // s africa
+    EAT = 3,
+    MSD = 3,    // moscow
+    AST = 3,    // arabia
+    IRT = 3.5,  // iran
+    IST  = 5.5, // india
+    CNST  = 8,   // china
+    WST = 8,  // west aus
+    JST = 9,  // japan
+    ACST = 9.5, // aus central
+    AEST = 10,  // aus eastern
+    NZST = 12;
+
+var DB = {
+	// long, lat, time_offset, summerzone
+	"Europe": false,
+	
+	"Amsterdam, Netherlands":       [  52.22,    4.53,  CET,  1 ],
+	"Athens, Greece":               [  37.58,   23.43,  EET,  1 ],
+	"Barcelona, Spain":             [  41.23,    2.90,  CET,  1 ],
+	"Belfast, United Kingdom":      [  54.37,   -5.56,  GMT,  1 ],
+	"Belgrade, Serbia":             [  44.52,   20.32,  CET,  1 ],
+	"Brussels, Belgium":            [  50.52,    4.22,  CET,  1 ],
+	"Bucharest, Romania":           [  44.25,   26.70,  EET,  1 ],
+	"Budapest, Hungary":            [  47.30,   19.50,  CET,  1 ],
+	"Copenhagen, Denmark":          [  55.40,   12.34,  CET,  1 ],
+	"Dublin, Ireland":              [  53.20,   -6.15,  GMT,  1 ],
+	"Edinburgh, United Kingdom":    [  55.55,   -3.10,  GMT,  1 ],
+	"Frankfurt, Germany":           [   50.7,    8.41,  CET,  1 ],
+	"Glasgow, Scotland":            [  55.50,   -4.15,  GMT,  1 ],
+	"Hamburg, Germany":             [  53.33,   10.20,  CET,  1 ],
+	"Helsinki, Finland":            [  60.10,   25.00,  EET,  1 ],
+	"Lisbon, Portugal":             [  38.44,   -9.90,  GMT,  1 ],
+	"Liverpool, United Kingdom":    [  53.25,   -3.00,  GMT,  1 ],
+	"London, United Kingdom":       [  51.32,   -0.50,  GMT,  1 ],
+	"Lyons, France":                [  45.45,    4.50,  CET,  1 ],
+	"Kiev, Ukraine":                [  50.27,   30.31,  EET,  1 ],
+	"Madrid, Spain":                [  40.26,   -3.42,  CET,  1 ],
+	"Manchester, United Kingdom":   [  53.30,   -2.15,  GMT,  1 ],
+	"Marseilles, France":           [  43.20,    5.20,  CET,  1 ],
+	"Milan, Italy":                 [  45.27,    9.10,  CET,  1 ],
+	"Moscow, Russia":               [  55.45,   37.36,  MSD,  1 ],
+	"Munich, Germany":              [  48.8,    11.35,  CET,  1 ],
+	"Naples, Italy":                [  40.50,   14.15,  CET,  1 ], 
+	"Oslo, Norway":                 [  59.57,   10.42,  CET,  1 ],
+	"Paris, France":                [  48.48,    2.20,  CET,  1 ],
+	"Reykjavik, Iceland":           [  64.40,  -21.58,  GMT ],
+	"Sofia, Bulgaria":              [  42.40,   23.20,  EET,  1 ],
+	"Prague, Czech Republic":       [  50.50,   14.26,  CET,  1 ],
+	"Rome, Italy":                  [  41.54,   12.27,  CET,  1 ],
+	"St. Petersburg, Russia":       [  59.56,   30.18,  MSD,  1 ],
+	"Stockholm, Sweden":            [  59.17,   18.30,  CET,  1 ],
+	"Venice, Italy":                [  45.26,   12.20,  CET,  1 ],
+	"Vienna, Austria":              [  48.14,   16.20,  CET,  1 ],
+	"Vladivostok, Russia":          [  43.10,  132.00,   10,  1 ],
+	"Warsaw, Poland":               [  52.14,   21.00,  CET,  1 ],
+	"Zurich, Switzerland":          [  47.21,    8.31,  CET,  1 ],
+
+	"North America": false,
+	
+	"Atlanta, USA":                 [  33.45,   84.23,  EST, 10 ],
+	"Boston, USA":                  [  42.21,   71.50,  EST, 10 ], 
+	"Calgary, Canada":              [  51.10,  114.10,  MST, 10 ],
+	"Chicago, USA":                 [  41.50,   87.37,  CST, 10 ], 
+	"Columbus, USA":                [  34.00, 	81.20,  EST, 10 ],
+	"Dallas, USA":                  [  32.46,	  96.46,  CST, 10 ],
+	"Detroit, USA":                 [  42.20,	  83.30,  EST, 10 ],
+	"Houston, USA":                 [  29.45,	  95.21,  CST, 10 ],
+	"Los Angeles, USA":             [  34.30,	 118.15,  PST, 10 ],
+	"Mexico City, Mexico":          [  19.26,  -99.70,  CST,  6 ],
+	"New York City, USA":           [  40.47,   73.58,  EST, 10 ],
+	"New Orleans, USA":             [  29.57,	  90.40,  CST, 10 ],
+	"Philadelphia, USA":            [  39.57,	  75.10,  EST, 10 ],
+	"Phoenix, USA":                 [  33.29,	 112.40,  MST,  0 ],
+	"San Diego, USA":               [  32.42,	 117.10,  PST, 10 ],
+	"San Francisco, USA":           [  37.47,	 122.26,  PST, 10 ],
+	"Seattle, USA":                 [  47.37,	 122.20,  PST, 10 ],
+	"Toronto, Canada":              [  43.40,   79.24,  EST, 10 ],
+	"Vancouver, Canada":            [  49.13,  123.06,  PST, 10 ],
+	
+
+	"Africa": false,
+	
+	"Algiers, Algeria":             [  36.00,    3.00,  CET ],
+	"Cairo, Egypt":                 [  30.20,   31.21,  EET ],
+	"Cape Town, South Africa":      [ -33.55,   18.22,  SAST ],
+	"Dakar, Senegal":               [  14.40,  -17.28,  GMT ],
+	"Djibouti, Djibouti":           [  11.30,   43.30,  EAT ],
+	"Durban, South Africa":         [ -29.53,   30.53,  SAST ],
+	"Johannesburg, South Africa":   [ -26.12,   28.40,  SAST ],
+	"Kinshasa, Congo":              [  -4.18,   15.17,  WAT ],
+	"Lagos, Nigeria":               [   6.27,    3.23,  WAT ],
+	"Nairobi, Kenya":               [  -1.25,   36.55,  EAT ],
+	"Tripoli, Libya":               [  32.57,   13.12,  EET ],
+									
+									
+	"Middle East": false,
+	"Ankara, Turkey":               [  39.55,   32.55,  EET,  1 ],
+	"Istanbul, Turkey":             [  41.01,   28.58,  EET,  1 ],
+	"Mecca, Saudi Arabia":          [  21.29,   39.45,  AST,  0 ],
+	"Teheran, Iran":                [  35.45,   51.45,  IRT,  2 ],
+						
+	"Oceania": false,
+																												 
+	"Adelaide, Australia":          [ -34.55,  138.36, ACST,  3 ],
+	"Auckland, New Zealand":        [ -36.52,  174.45, NZST,  4 ],
+	"Brisbane, Australia":          [ -27.29 , 153.80, AEST,  0 ],
+	"Darwin, Australia":            [ -12.28,  130.51, ACST,  0 ],
+	"Melbourne, Australia":         [ -37.47 , 144.58, AEST,  3 ],
+	"Perth, Australia":             [ -31.57 , 115.52, WST ,  0 ],
+	"Sydney, Australia":            [  -34.0,  151.00, AEST,  3 ],
+	"Wellington, New Zealand":      [ -41.17,  174.47, NZST,  4 ],
+	
+	
+	"Asia": false,
+	
+	"Bangkok, Thailand":            [  13.45,  100.30,    7 ],
+	"Beijing, China":               [  39.55,  116.25, CNST ], 
+	"Calcutta, India":              [  22.34,   88.24,  IST ],
+	"Canton, China":                [  23.70,  113.15, CNST ],
+	"Chongqing, China":             [  29.46,  106.34, CNST ],
+	"Hong Kong, China":             [  22.20,  114.11, CNST ],
+	"Jakarta, Indonesia":           [  -6.16,  106.48,    7 ],
+	"Kuala Lumpur, Malaysia":       [   3.80,  101.42,    8 ],
+	"Manila, Philippines":          [  14.35,  120.57,    8 ],
+	"Mumbai, India":                [  19.00,   72.48,  IST ],
+	"Nagasaki, Japan":              [  32.48,  129.57,  JST ],
+	"Nagoya, Japan":                [  35.7,   136.56,  JST ],
+	"Nanjing, China":               [  32.3,   118.53, CNST ],
+	"New Delhi, India":             [  28.35,   77.12,  IST ],
+	"Osaka, Japan":                 [  34.32,  135.30,  JST ],
+"Port Moresby, Papua New Guinea":  [  -9.25,  147.80,   10 ],
+	"Rangoon, Myanmar":             [  16.50,   96.00,  6.5 ],
+	"Shanghai, China":              [  31.10,  121.28, CNST ],
+	"Singapore, Singapore":         [   1.14,  103.55,    8 ],
+	"Seoul, South Korea":           [  37.33,  126.59,    9 ],
+	"Tokyo, Japan":                 [  35.40,  139.45,  JST ],
+		
+	
+	"South America": false,
+	
+	"Bogota, Colombia":             [   4.32,  -74.15,   -5 ],
+	"Buenos Aires, Argentina":      [ -34.35,  -58.22,  ART ],
+	"Caracas, Venezuela":           [  10.28,  -67.20, -4.5 ],
+	"Cayenne, French Guiana":       [   4.49,  -52.18,   -3 ],
+	"Cordoba, Argentina":           [ -31.28,  -64.10,  ART ],
+	"Georgetown, Guyana":           [   6.45,  -58.15,   -4 ],
+	"Guatemala City, Guatemala":    [  14.37,  -90.31,  CST ],
+	"Guayaquil, Ecuador":           [  -2.10,  -79.56,   -5 ],
+	"Havana, Cuba":                 [  23.80,  -82.23,   -5,  5 ],
+	"Kingston, Jamaica":            [  17.59,  -76.49,   -5 ],
+	"La Paz, Bolivia":              [ -16.27,  -68.22,   -4 ],
+	"Lima, Peru":                   [ -12.00,  -77.20,   -5 ],
+	"Montevideo, Uruguay":          [ -34.53,  -56.10,   -3,  7 ],
+	"Panama City, Panama":          [   8.58,  -79.32,  EST ],
+	"Paramaribo, Suriname":         [   5.45,  -55.15,   -3 ],
+	"Rio de Janeiro, Brazil":       [ -22.57,  -43.12, BRST,  8 ],
+	"Salvador, Brazil":             [ -12.56 , -38.27, BRST,  0 ],
+	"Santiago, Chile":              [ -33.28,  -70.45,   -4,  9 ],
+	"Sao Paulo, Brazil":            [ -23.31,  -46.31, BRST,  8 ]
+	
+};
+
+var DESCRIPTION = {
+	predawn: "Dawn approaches ",
+	dawn: "Day breaks over ",
+	morning: "Morning has broken in ",
+	day: "The sun hangs over ",
+	evening: "The sun tires in ",
+	dusk: "Night descends on ",
+	night: "Darkness reigns in ",
+	twilight: "Twilight hangs over "
+};
+
+Date.prototype.getDayOfTheYear = function() {
+	var onejan = new Date(this.getFullYear(),0,1);
+	return Math.ceil((this - onejan) / 86400000);
+}
+
+Date.prototype.getMinuteOfTheDay = function() {
+	return this.getHours() * 60 + this.getMinutes()
+}
+
+
+
+// -- *D ---
+//
+// These trigonometry functions use degrees instead of radians.
+//
+function sinD(n)  { return Math.sin (n * 0.0174532925199433); }
+function cosD(n)  { return Math.cos (n * 0.0174532925199433); }
+function tanD(n)  { return Math.tan (n * 0.0174532925199433); }
+function asinD(n) { return Math.asin(n) * 57.2957795130823;   }
+function acosD(n) { return Math.acos(n) * 57.2957795130823;   }
+function atanD(n) { return Math.atan(n) * 57.2957795130823;   }
+
+
+function Int(n) { return n < 0 ? Math.ceil(n) : Math.floor(n); }
+function Sign(n) { if (n < 0) return -1; if (n > 0) return 1; return 0; }
+
+
+// -- isNull --
+//
+// Determines whether an object is null.
+//
+function isNull(anObject)
+{
+		return typeof anObject == "object" && !anObject;
+}
+
+
+// --- CalculateSunriseOrSunset ---
+//
+// Calculates the time of sunrise or sunset at a given location on a given day.
+//
+// Parameters
+//    latitude - latitude in degrees of location
+//   longitude - longitude in degrees of location
+//        date - Date object - day to calculate
+//     sunrise - Boolean - whether to calculate sunrise (true) or sunset (false)
+//    twilight - Boolean - whether to calculate twilight (true) or sunrise/sunset (false)
+//
+// Returns
+//   floating-point hour of sun event in UTC
+//     (e.g., 5.15 => 0509Z), or null if the event doesn't occur on the given day
+//
+function CalculateSunriseOrSunset(latitude, longitude, date, sunrise, twilight)
+{
+		// Source:
+		//   Almanac for Computers, 1990
+		//   published by Nautical Almanac Office
+		//   United States Naval Observatory
+		//   Washington, DC 20392
+
+		day   = date.getDate();
+		month = date.getMonth() + 1;
+		year  = date.getFullYear();
+
+		var zenith;
+
+		if (twilight)
+		{
+				// twilightSelect = document.getElementById('twilight');
+				// zenith = twilightSelect.value;
+
+				// <option id="civilOption" value="96" selected></option>
+				// <option id="nauticalOption" value="102"></option>
+				// <option id="astronomicalOption" value="108"></option>
+				zenith = 99;
+		}
+		else
+				zenith = 90.8333333333;
+
+
+		// Calculate the day of the year.
+
+		N1 = Math.floor(275.0 * month / 9.0);
+		N2 = Math.floor((month + 9.0) / 12.0);
+		N3 = 1.0 + Math.floor((year - 4.0 * Math.floor(year / 4.0) + 2.0) / 3.0);
+		N = N1 - (N2 * N3) + day - 30.0;
+
+
+		// Convert the longitude to hour value and calculate an approximate time.
+
+		lngHour = longitude / 15.0;
+
+		if (sunrise)
+				t = N + ((6.0 - lngHour) / 24.0);
+		else
+				t = N + ((18.0 - lngHour) / 24.0)
+
+
+		// Calculate the sun's mean anomaly.
+
+		M = (0.9856 * t) - 3.289;
+
+
+		// Calculate the sun's true longitude.
+
+		L = M + (1.916 * sinD(M)) + (0.020 * sinD(2 * M)) + 282.634;
+
+		while (L >= 360) L -= 360.0;
+		while (L <  0)   L += 360.0;
+
+
+		// Caculate the sun's right ascension.
+
+		RA = atanD(0.91764 * tanD(L));
+
+		while (RA >= 360) RA -= 360.0;
+		while (RA <  0)   RA += 360.0;
+
+
+		// Right ascension value needs to be in the same quadrant as L.
+
+		Lquadrant = Math.floor(L / 90.0) * 90.0;
+		RAquadrant = Math.floor(RA / 90.0) * 90.0;
+		RA = RA + (Lquadrant - RAquadrant);
+
+
+		// Right ascension value needs to be converted into hours.
+
+		RA /= 15.0;
+
+
+		// Calculate the sun's declination.
+
+		sinDec = 0.39782 * sinD(L);
+		cosDec = cosD(asinD(sinDec));
+
+
+		// Calculate the sun's local hour angle.
+
+		cosH = (cosD(zenith) - (sinDec * sinD(latitude))) / (cosDec * cosD(latitude));
+
+		if (sunrise)
+		{
+				if (cosH > 1) return null;
+		}
+		else
+		{
+				if (cosH < -1) return null;
+		}
+
+
+		// Finish calculating H and convert into hours.
+
+		if (sunrise)
+				H = 360.0 - acosD(cosH);
+		else
+				H = acosD(cosH);
+
+		H /= 15.0
+
+
+		// Calculate local mean time of rising.
+
+		T = H + RA - (0.06571 * t) - 6.622;
+
+
+		// Adjust back to UTC.
+
+		// we want local time
+		UT = T; // - lngHour;
+
+		// UT += Math.ceil(longitude / 15);
+		
+		// UT -= DB[LOCATION][2];
+
+
+		// while (UT >= 24) UT -= 24.0;
+		// while (UT <  0)  UT += 24.0;
+
+		return box_hours(UT);
+}
+
+// 
+function adjust_time_hack(hours) {
+	var tmp = hours + DB[LOCATION][2];
+	
+	return box_hours(tmp);
+}
+
+function box_hours (tmp) {
+	 while (tmp >= 24) tmp -= 24.0;
+		while (tmp <  0)  tmp += 24.0;
+		return tmp;
+}
+
+var loc_string = 'London, United Kingdom';
+
+if (false && geo) {
+	loc_string = geo.ll[2].city + ', ' + geo.ll[2].country;
+	if (! DB[loc_string] ) {
+		loc_string = false;
+	}
+}
+
+
+var currentYear = (new Date()).getFullYear();
+
+var LOCATION = $.cookie('CITY') || loc_string,
+		X = 365,
+		Y = 24,
+		X_SCALE = 1,
+		Y_SCALE = 20,
+		JAN_FIRST = new Date(currentYear + '/01/01'),
+		HOUR_IN_MS = 60 * 60 * 1000;
+		DAY_IN_MS = HOUR_IN_MS * 24,
+		current_day = JAN_FIRST.getTime(),
+		LONG = DB[LOCATION][0],
+		LAT = DB[LOCATION][1],
+		NOW = (new Date()),
+		ROUGH_TWILIGHT_LENGTH = 0;
+
+var DST_START, DST_END;
+	
+var ua = navigator.userAgent.toLowerCase();
+var TOUCH_INTERFACE = ((ua.indexOf('iphone')        != -1) ||
+											 (ua.indexOf('ipod')          != -1) || 
+											 (ua.indexOf('ipad')          != -1) ||
+											 (ua.indexOf('android')       != -1) ||
+											 (ua.indexOf('webos')         != -1) ||
+											 (ua.indexOf('windows phone') != -1)
+											);
+
+
+
+
+function calc_summertime_offset (now) {
+	if (! DB[LOCATION][3]) return 0; // no summertime
+	
+	if (DB[LOCATION][0] < 0) { // southern hem
+		return ((now < DST_START) || (now > DST_END)) ? 1 : 0;
+	} else {
+		return (now > DST_START && now < DST_END) ? 1 : 0;  
+	}
+}
+
+
+$(window).ready(function () {
+	
+	if (TOUCH_INTERFACE) {
+		$('body').addClass('TOUCH');
+	}
+	
+	$.each(DB, function(city, ll) {
+		if (ll) {
+			$('#cities').append("<span>" + city + "</span> ");
+		} else {
+			$('#cities').append('<hr><h2>' + city + '</h2>');
+		}
+	});
+
+	$('#cities span').click(function() {
+		var city = $(this).text();
+		$.cookie('CITY', city);
+		LOCATION = city;
+		LONG = DB[city][0];
+		LAT = DB[city][1];
+		$('#cities').fadeOut();
+		refresh();
+	});
+
+	$('h1 a').click(function() {
+		$('#cities').toggle();
+	});
+
+	if (TOUCH_INTERFACE) {
+		window.scrollTo(0, 1);
+	}
+
+	setInterval(refresh, 20000);
+});
+
+
+
+var Canvas = {
+	clear: function() {}
+}
+
+var cx;
+
+function refresh() {
+	if (DB[LOCATION][3]) {
+		DST_START = new Date ( SUNTIME[ DB[LOCATION][3] ][0] + " " + currentYear );
+		DST_END = new Date ( SUNTIME[ DB[LOCATION][3] ][1] + " " + currentYear );
+	} else {
+		DST_END = null;
+		DST_START = null;
+	}
+	
+	var tmp = new Date();
+	NOW = new Date( Date.now() + tmp.getTimezoneOffset() * 60 * 1000 );
+	current_day = JAN_FIRST.getTime(),
+	
+	$('h1 span#location').html( LOCATION );
+	
+	var example = document.getElementById('example');
+	cx = example.getContext('2d');
+	cx.clearRect (0, 0, 1000, 1000);
+
+	cx.fillStyle = '#000014';
+	cx.fillRect(0, 0, 365, 480);
+
+	// every day in the year
+	for (var x=0; x < X; x++) {
+		// var day = new Day( x );
+		// day.draw();
+		var current_date = new Date(current_day);
+		var timeOf = {
+			dawn:    CalculateSunriseOrSunset(LONG, LAT, current_date, true, true),
+			dusk:    CalculateSunriseOrSunset(LONG, LAT, current_date, false, true),
+			sunrise: CalculateSunriseOrSunset(LONG, LAT, current_date, true),
+			sunset:  CalculateSunriseOrSunset(LONG, LAT, current_date, false)
+		};
+		var offset = calc_summertime_offset(current_date);
+		timeOf.sunrise += offset;
+		timeOf.sunset += offset;
+		timeOf.dusk += offset;
+		timeOf.dawn += offset;
+
+		Day.setX(x);
+		if (LONG < 58) {
+			Day.drawDawn(timeOf);
+			Day.drawDusk(timeOf);
+		}
+		Day.drawFullLight(timeOf);
+
+		current_day += DAY_IN_MS;
+	}
+
+	AxesToDraw.todayLine();
+	AxesToDraw.timeGrid();
+
+	var summertime_offset = calc_summertime_offset(NOW);
+	var guessed_hours = box_hours(adjust_time_hack(NOW.getMinuteOfTheDay() / 60) + summertime_offset);
+	var now_minutes_pos = Math.floor(guessed_hours * Y_SCALE);
+
+	AxesToDraw.suns(now_minutes_pos);
+	
+	var boxed = {
+		sunrise : box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, true) + summertime_offset),
+		sunset  : box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, false) + summertime_offset),
+		dawn    : box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, true, true) + summertime_offset),
+		dusk    : box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, false, true) + summertime_offset)
+	};
+
+	AxesToDraw.horizonPassedBars(boxed);
+	AxesToDraw.text(boxed, guessed_hours, now_minutes_pos);
+
+	$( $('#months div').get(NOW.getMonth()) ).addClass('ACTIVE');
+} // end refresh
+
+
+var Day = {
+	setX: function(x) { this.x = x },
+	drawFullLight: function(timeOf) {
+		// main daylight
+		if (timeOf.sunrise) {
+			cx.fillRect(this.x * X_SCALE, timeOf.sunrise * Y_SCALE, X_SCALE, (timeOf.sunset - timeOf.sunrise) * Y_SCALE);
+		} else {
+		}
+	},
+	drawDawn: function(timeOf) { // dawn twilight
+		if (timeOf.sunrise && timeOf.dawn) {
+			var dawn_length = (timeOf.sunrise - timeOf.dawn) * Y_SCALE,
+			    dawn_pos = timeOf.dawn * Y_SCALE,
+			    ROUGH_TWILIGHT_LENGTH = dawn_length;
+
+			var dawngrad = cx.createLinearGradient(0, dawn_pos, 0, dawn_length + dawn_pos);  
+			    dawngrad.addColorStop(0, '#000028');  
+			    dawngrad.addColorStop(1.0, 'rgb(240,240,255)');  
+
+			cx.fillStyle = dawngrad;
+			cx.fillRect(this.x * X_SCALE, dawn_pos, X_SCALE, dawn_length + 1);
+		} else {
+			// ?
+		}
+	},
+	drawDusk: function(timeOf) {
+		// dusk twilight
+		if (timeOf.sunset && timeOf.dusk) {
+			var dusk_length = (timeOf.dusk - timeOf.sunset) * Y_SCALE,
+			    dusk_pos = timeOf.dusk * Y_SCALE;
+	
+			var duskgrad = cx.createLinearGradient(0, timeOf.sunset * Y_SCALE, 0, dusk_pos);  
+			    duskgrad.addColorStop(1, '#000028');  
+			    duskgrad.addColorStop(0, 'rgb(240,240,255)');  
+
+			cx.fillStyle = duskgrad;
+			cx.fillRect(this.x * X_SCALE, (timeOf.sunset * Y_SCALE) - 1, X_SCALE, dusk_length);
+		}
+	}
+}
+
+var AxesToDraw = {
+	todayLine: function() {
+		cx.fillStyle = "rgba(150, 150, 0, 0.4)";
+		cx.fillRect(X_SCALE * NOW.getDayOfTheYear(), 1, 1, Y * Y_SCALE);
+	},
+	timeGrid: function() {
+		cx.fillStyle = "rgba(180, 180, 180, 0.2)";
+		for (var i = 0; i < 25; ++i) {
+			if (i % 6 == 0) { 
+				cx.fillRect(0, i * Y_SCALE, X * X_SCALE, 1);
+			}
+		}
+	},
+	suns: function(y) {
+		// sun right aligned
+		cx.fillStyle = "rgba(255,255,0,1)";
+		cx.fillRect(X_SCALE * X - 1, y, X_SCALE, 1);
+		// the sun square
+		cx.fillStyle = "rgba(0,0,0,0.5)";
+		cx.fillRect(X_SCALE * NOW.getDayOfTheYear() - 2, y - 2, 5, 5); 
+		cx.fillStyle = "rgb(255,255,0)";
+		cx.fillRect(X_SCALE * NOW.getDayOfTheYear() - 1, y - 1, 3, 3);
+	},
+	horizonPassedBars: function(boxed) {
+		// sun rise + set horizontals
+		cx.fillStyle = "rgba(130,130,100,1)";
+		cx.fillRect(NOW.getDayOfTheYear() - 5, Math.floor(boxed.sunrise * Y_SCALE), 12, 1);
+		cx.fillRect(NOW.getDayOfTheYear() - 5, Math.floor(boxed.sunset * Y_SCALE), 12, 1);
+		
+		cx.fillStyle = "rgba(150,150,150,1)";
+		cx.fillRect(X * X_SCALE, Math.floor(boxed.sunrise * Y_SCALE), 12, 1);
+		cx.fillRect(X * X_SCALE, Math.floor(boxed.sunset * Y_SCALE), 12, 1);
+	},
+	text: function(boxed, guessed_hours, now_minutes_pos) {
+		$('#rise').css({ 
+			top: Math.floor(boxed.sunrise * Y_SCALE) - 8
+		}).find('span').text(Convert.n_to_hhmm(boxed.sunrise));
+		
+		$('#set').css({
+			 top: Math.floor(boxed.sunset * Y_SCALE) - 8 
+		}).find('span').text(Convert.n_to_hhmm(boxed.sunset));
+
+		$('#months span#date').text(NOW.getDate()).css({ left: NOW.getMonth() * 30 + 3 });
+		var currentTimeMarginLeft = NOW.getMonth() * 30;
+		currentTimeMarginLeft += NOW.getMonth() < 9 ? 92 : 24;
+		$('#times span').text(Convert.n_to_hhmm(guessed_hours)).css({ top: now_minutes_pos - 4, left: currentTimeMarginLeft });
+	}
+}
+
+var Convert = {
+	time_to_n: function(t) {
+		return t.getHours() +  (t.getMinutes() / 60)
+	},
+	n_to_time: function (n) {
+		return new Date(HOUR_IN_MS * n);
+	},
+	time_to_hhmm: function(t) {
+		var mins = t.getMinutes() + "";
+		if (mins.length == 1) { mins = "0" + mins; }
+		
+		return t.getHours() + ":" + mins;
+	},
+	n_to_hhmm: function(n) {
+		var both = n.toString().split('.');
+		var mins = "0." + (both[1] || 0); // to denominator
+		mins *= 60; // to minutes
+		mins = Math.floor(mins);
+		mins += ""; // to string
+		return both[0] + ":" + ((mins.length == 2) ? mins : "0" + mins);
+	}
+}
+		</script> 
+
+		<style type="text/css"> 
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			
+			body {
 /*        font-family: Geneva;*/
-        font-family: Georgia;
-        background: #10102b;
+				font-family: Georgia;
+				background: #10102b;
 /*        padding: 24px 48px;*/
-        height: 100%;
-      }
-      
-      body.TOUCH {
-        height: 640px;
-      }
-      
-      h1 {
-        font-size: 24px;
-        position: absolute;
-        top: 24px;
-        width: 460px;
-        left: 50%;
-        margin-left: -235px;
-        text-align: center;
-        color: #fff;
-        font-weight: 100;
-        font-family: "Helvetica Neue";
-        letter-spacing: 2px;
-        z-index: 10;
-      }
-      
-      h1 a {
-        text-decoration: underline;
-        display: block;
-        color: #888;
-        margin-top: 2px;
-        font-size: 12px;
-        cursor: pointer;
-        
-      }
-      
-      h1 a:hover {
-        color: white !important;
-      }
-      
-      #cities {
-        font-weight: 100;
-        font-family: "Helvetica Neue";
-        letter-spacing: 3px;
-        display: none;
-        position: absolute;
-        top: 24px;
+				height: 100%;
+			}
+			
+			body.TOUCH {
+				height: 640px;
+			}
+			
+			h1 {
+				font-size: 24px;
+				position: absolute;
+				top: 24px;
+				width: 460px;
+				left: 50%;
+				margin-left: -235px;
+				text-align: center;
+				color: #fff;
+				font-weight: 100;
+				font-family: "Helvetica Neue";
+				letter-spacing: 2px;
+				z-index: 10;
+			}
+			
+			h1 a {
+				text-decoration: underline;
+				display: block;
+				color: #888;
+				margin-top: 2px;
+				font-size: 12px;
+				cursor: pointer;
+				
+			}
+			
+			h1 a:hover {
+				color: white !important;
+			}
+			
+			#cities {
+				font-weight: 100;
+				font-family: "Helvetica Neue";
+				letter-spacing: 3px;
+				display: none;
+				position: absolute;
+				top: 24px;
 /*        background:;*/
-        font-size: 14px;
-        margin: 24px 24px;
-        padding: 24px 24px;
-        background: rgba(0,0,0,0.8);
-        z-index: 1;
-        left: 0;
-        color: #ccc;
-        line-height: 1.4em;
+				font-size: 14px;
+				margin: 24px 24px;
+				padding: 24px 24px;
+				background: rgba(0,0,0,0.8);
+				z-index: 1;
+				left: 0;
+				color: #ccc;
+				line-height: 1.4em;
 /*        word-spacing: -5px;*/
 /*        text-align: center;*/
-        
-      }
+				
+			}
 
-      #cities h2 {
-        display: inline;
-        font-size: 12px;
-        margin-top: 6px;
-        margin-right: 16px;
-      }
+			#cities h2 {
+				display: inline;
+				font-size: 12px;
+				margin-top: 6px;
+				margin-right: 16px;
+			}
 
-      hr {
-        display: block;
-        height: 8px;
-        visibility: hidden;
+			hr {
+				display: block;
+				height: 8px;
+				visibility: hidden;
 /*        width: 100%;*/
 /*        background: red;*/
-      }
+			}
 
-      #cities span {
-        margin-right: 12px;
-        letter-spacing: 1px;
+			#cities span {
+				margin-right: 12px;
+				letter-spacing: 1px;
 /*        display: block;*/
 /*        float: left;*/
-        white-space: nowrap;
-        font-size: 12px;
-        
+				white-space: nowrap;
+				font-size: 12px;
+				
 /*        border-bottom: 1px solid #999;*/
 /*          padding: 0 12px 0 12px;*/
-      }
+			}
 
-      #cities span:hover {
-        color: white;
-        cursor: pointer;
-      }
+			#cities span:hover {
+				color: white;
+				cursor: pointer;
+			}
 
-      
-      div#main {
-        height: 481px;
-        position: relative;
-        top: 50%;
-        left: 0px;
-        width: 370px;
-        margin: -250px auto 0;
-      }
-      
-      body.TOUCH div#main {
-        margin-top: 36px;
-        top: 0px;
-      }
-      
-      canvas {
-        /*background: #000028;*/
-      }
-      
-      
-      #times {
-        position: absolute;
-        top: 5px;
-        left: -56px;
-        color: #446;
+			
+			div#main {
+				height: 481px;
+				position: relative;
+				top: 50%;
+				left: 0px;
+				width: 370px;
+				margin: -250px auto 0;
+			}
+			
+			body.TOUCH div#main {
+				margin-top: 36px;
+				top: 0px;
+			}
+			
+			canvas {
+				/*background: #000028;*/
+			}
+			
+			
+			#times {
+				position: absolute;
+				top: 5px;
+				left: -56px;
+				color: #446;
 /*        left: -6px;*/
-        font-size: 18px;
-        margin-top: -16px;
-        height: 400px;
+				font-size: 18px;
+				margin-top: -16px;
+				height: 400px;
 /*        overflow: hidden;*/
-      }
-      
-      #times div {
-        text-align: right;
-        height: 120px;
-      }
-      
-      #times span {
-        display: block;
-        text-align: right;
+			}
+			
+			#times div {
+				text-align: right;
+				height: 120px;
+			}
+			
+			#times span {
+				display: block;
+				text-align: right;
 /*        right: -296px;*/
-        margin-top: 6px;
-        left: 300px;
+				margin-top: 6px;
+				left: 300px;
 /*        text-shadow: 1px 1px 2px #000;*/
-        color: #ff0;
-        font-size: 12px;
-        background: rgba(0,0,40, 0.8);
+				color: #ff0;
+				font-size: 12px;
+				background: rgba(0,0,40, 0.8);
 /*        border: 1px solid #111;*/
-        padding: 1px 4px 2px 4px;
+				padding: 1px 4px 2px 4px;
 /*        font-size: 15px;*/
-        -webkit-border-radius: 2px;
-        -moz-border-radius: 2px;
-        border-radius: 2px;
-        position: absolute;
-      }
-      
-      #months {
-        position: absolute;
-        bottom: -24px;
-        color: #446;
+				-webkit-border-radius: 2px;
+				-moz-border-radius: 2px;
+				border-radius: 2px;
+				position: absolute;
+			}
+			
+			#months {
+				position: absolute;
+				bottom: -24px;
+				color: #446;
 /*        width: 730px;*/
-        vertical-align: middle;
-        padding-left: 2px;
+				vertical-align: middle;
+				padding-left: 2px;
 /*        overflow: hidden;*/
-        height: 24px;
+				height: 24px;
 /*        outline: 1px solid red;*/
-      }
-      #months div {
+			}
+			#months div {
 /*        background: black;*/
-        height: 24px;
-        padding-top: 6px;
-        font-size: 12px;
-        letter-spacing: -1px;
-        width: 30px;
-        text-align: center;
-        float: left;
-        text-transform: uppercase;
-      }
-      
-      #months div.ACTIVE {
-        color: #ddd;
-      }
-      
-      #months span {
-        position: absolute;
-        top: 14px;
-        left: 8px;
+				height: 24px;
+				padding-top: 6px;
+				font-size: 12px;
+				letter-spacing: -1px;
+				width: 30px;
+				text-align: center;
+				float: left;
+				text-transform: uppercase;
+			}
+			
+			#months div.ACTIVE {
+				color: #ddd;
+			}
+			
+			#months span {
+				position: absolute;
+				top: 14px;
+				left: 8px;
 /*        left: 280px; */
-        display: block;
-        width: 30px;
-        color: #eee;
-        text-align: center;
+				display: block;
+				width: 30px;
+				color: #eee;
+				text-align: center;
 /*        font-size: 11px;*/
-      }
-      
-      #sun {
-        font-size: 18px;
-        position: absolute;
-        top: -4px;
-        right: -12px;
-        color: #888;
-        text-transform: uppercase;
-      }
-      
-      #sun div {
-        width: 80px;
+			}
+			
+			#sun {
+				font-size: 18px;
+				position: absolute;
+				top: -4px;
+				right: -12px;
+				color: #888;
+				text-transform: uppercase;
+			}
+			
+			#sun div {
+				width: 80px;
 /*        left: -10px;*/
-        position: absolute;
-      }
-      
-      #sun span {
-        margin: 0 4px;
-        color: #ccd;
-      }
+				position: absolute;
+			}
+			
+			#sun span {
+				margin: 0 4px;
+				color: #ccd;
+			}
 
-      #sun strong {
-        display: none;
-        font-weight: normal;
-        font-size: 12px;
-        color: #bbc;
+			#sun strong {
+				display: none;
+				font-weight: normal;
+				font-size: 12px;
+				color: #bbc;
 /*        text-decoration: line-through;*/
-      }      
-      
-      #contact {
-        position: absolute;
-        right: 24px;
+			}      
+			
+			#contact {
+				position: absolute;
+				right: 24px;
 /*        top: 12px;*/
-      }
-      #about {
-        z-index: -1;
-        font-family: Helvetica Neue;
-        font-weight: 300;
-        position: absolute;
-        bottom: 12px;
-        left: 50%;
-        margin-left: -200px;
-        width: 400px;
-        text-align: center;
-        color: #446;
-        font-size: 10px;
-      }
-      
-      body.TOUCH #about {
-        position: relative;
-        bottom: -64px;
-      }
-      
-      a {
-        color: #446;
-      }
-    </style> 
-  </head> 
-   
-  <body onload="refresh();"> 
-    
-    <h1><span id="status"></span> <span id="location">London</span> <a>Change city</a></h1>
-    
-    <div id="cities">
-    </div>
-    
-    <div id="main">
-      <canvas id="example" width="420" height="481">
-        Sorry, your browser does not support HTML5 Canvas.
-      </canvas>
-    
-      <div id="sun">
-        <div id="rise">
-           <strong>&uarr;</strong> <span id='sunrise'></span>
-        </div>
-        <div id="set">
-           <strong>&darr;</strong> <span id="sunset"></span>
-        </div>
-      </div>
-    
-      <div id="times">
-        <div></div>
-        <div>6:00</div>
-        <div>12:00</div>
-        <div>18:00</div>
-        <span id="time"></span>
-      </div>
-    
-      <div id="months">
-        <div>Jan</div>
-        <div>Feb</div>
-        <div>Mar</div>
-        <div>Apr</div>
-        <div>May</div>
-        <div>Jun</div>
-        <div>Jul</div>
-        <div>Aug</div>
-        <div>Sep</div>
-        <div>Oct</div>
-        <div>Nov</div>
-        <div>Dec</div>      
-        <span id="date"></span>
-      </div>
-    </div>
-    
-    <div id="about">
-      <div id="contact">
-        <a href="mailto:aboutthesun@sturob.com">Feedback</a>
-      </div>
-      <div id="copyright">
-        &copy; <a href="http://sturob.com/">Stuart Robinson</a> - 2010-14
-      </div>
-      <!-- <div id="share">
-            <div class="addthis_toolbox addthis_default_style">
-              <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
-              <a class="addthis_button_tweet"></a>
-              <a class="addthis_counter addthis_pill_style"></a>
-            </div>
-            <script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script>
-            <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=whencomesthesun"></script>
-          </div> -->
-       
-    </div>
-    
-    <script type="text/javascript">
-    var clicky = { log: function(){ return; }, goal: function(){ return; }};
-    var clicky_site_id = 66392680;
-    (function() {
-      var s = document.createElement('script');
-      s.type = 'text/javascript';
-      s.async = true;
-      s.src = ( document.location.protocol == 'https:' ? 'https://static.getclicky.com/js' : 'http://static.getclicky.com/js' );
-      ( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
-    })();
-    </script>
-    <a title="Real Time Web Analytics" href="http://getclicky.com/66392680"></a>
-    <noscript><p><img alt="Clicky" width="1" height="1" src="http://in.getclicky.com/66392680ns.gif" /></p></noscript>
-    
-  </body> 
+			}
+			#about {
+				z-index: -1;
+				font-family: Helvetica Neue;
+				font-weight: 300;
+				position: absolute;
+				bottom: 12px;
+				left: 50%;
+				margin-left: -200px;
+				width: 400px;
+				text-align: center;
+				color: #446;
+				font-size: 10px;
+			}
+			
+			body.TOUCH #about {
+				position: relative;
+				bottom: -64px;
+			}
+			
+			a {
+				color: #446;
+			}
+		</style> 
+	</head> 
+	 
+	<body onload="refresh();"> 
+		
+		<h1><span id="status"></span> <span id="location">London</span> <a>Change city</a></h1>
+		
+		<div id="cities">
+		</div>
+		
+		<div id="main">
+			<canvas id="example" width="420" height="481">
+				Sorry, your browser does not support HTML5 Canvas.
+			</canvas>
+		
+			<div id="sun">
+				<div id="rise">
+					 <strong>&uarr;</strong> <span id='sunrise'></span>
+				</div>
+				<div id="set">
+					 <strong>&darr;</strong> <span id="sunset"></span>
+				</div>
+			</div>
+		
+			<div id="times">
+				<div></div>
+				<div>6:00</div>
+				<div>12:00</div>
+				<div>18:00</div>
+				<span id="time"></span>
+			</div>
+		
+			<div id="months">
+				<div>Jan</div>
+				<div>Feb</div>
+				<div>Mar</div>
+				<div>Apr</div>
+				<div>May</div>
+				<div>Jun</div>
+				<div>Jul</div>
+				<div>Aug</div>
+				<div>Sep</div>
+				<div>Oct</div>
+				<div>Nov</div>
+				<div>Dec</div>      
+				<span id="date"></span>
+			</div>
+		</div>
+		
+		<div id="about">
+			<div id="contact">
+				<a href="mailto:aboutthesun@sturob.com">Feedback</a>
+			</div>
+			<div id="copyright">
+				&copy; <a href="http://sturob.com/">Stuart Robinson</a> - 2010-14
+			</div>
+			<!-- <div id="share">
+						<div class="addthis_toolbox addthis_default_style">
+							<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+							<a class="addthis_button_tweet"></a>
+							<a class="addthis_counter addthis_pill_style"></a>
+						</div>
+						<script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script>
+						<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=whencomesthesun"></script>
+					</div> -->
+			 
+		</div>
+		
+		<script type="text/javascript">
+		var clicky = { log: function(){ return; }, goal: function(){ return; }};
+		var clicky_site_id = 66392680;
+		(function() {
+			var s = document.createElement('script');
+			s.type = 'text/javascript';
+			s.async = true;
+			s.src = ( document.location.protocol == 'https:' ? 'https://static.getclicky.com/js' : 'http://static.getclicky.com/js' );
+			( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
+		})();
+		</script>
+		<a title="Real Time Web Analytics" href="http://getclicky.com/66392680"></a>
+		<noscript><p><img alt="Clicky" width="1" height="1" src="http://in.getclicky.com/66392680ns.gif" /></p></noscript>
+		
+	</body> 
 </html>
