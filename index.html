@@ -1,6 +1,4 @@
-
 <html> 
-<!-- <html manifest="/cache.manifest">  -->
 	<head> 
 		<title>When Comes the Sun</title> 
 
@@ -266,8 +264,8 @@ Date.prototype.getMinuteOfTheDay = function() {
 	return this.getHours() * 60 + this.getMinutes()
 }
 
-Date.prototype.getHourFloatOfTheDay = function() {
-	return this.getHours() + (this.getMinutes() / 60)
+Date.prototype.getUTCHourFloatOfTheDay = function() {
+	return this.getUTCHours() + (this.getUTCMinutes() / 60)
 }
 
 
@@ -412,20 +410,10 @@ function CalculateSunriseOrSunset(latitude, longitude, date, sunrise, twilight)
 		return box_hours(UT);
 }
 
-
 function box_hours (tmp) {
 	while (tmp >= 24) tmp -= 24.0;
 	while (tmp <  0)  tmp += 24.0;
 	return tmp;
-}
-
-
-
-
-// 
-function adjust_time_hack(hours) {
-	var tmp = hours + DB[Location.name()][2];
-	return box_hours(tmp);
 }
 
 
@@ -492,11 +480,7 @@ $(window).ready(function () {
 
 function refresh() {
 	var ll = Location.ll();
-
-	// work out what the time is at the selected location, even if we are not there
-	var dstMS = Location.dstOffset( new Date() ) * HOUR_IN_MS; // msecs of DST
-	var tzDiffMS = (new Date()).getTimezoneOffset() * 60 * 1000; // msecs difference
-	NOW = new Date( Date.now() + tzDiffMS + dstMS ); // HACK
+	NOW = new Date();
 
 	cx.clearRect(0, 0, 1000, 1000);
 
@@ -540,13 +524,19 @@ var Location = { // DB[] -> "Teheran, Iran": [  35.45,   51.45,  IRT,  2 ]
 			lat:  this.lat()
 		}
 	},
-	dstOffset: function (doty) {
+	localTimeInHoursN: function () {
+		var now = new Date();
+		return box_hours( 
+			now.getUTCHourFloatOfTheDay() + DB[this.current][2] + this.dstOffset( now ) 
+		)
+	},
+	dstOffset: function (date) {
 		if (! DB[this.current][3]) return 0;
 
 		if (DB[this.current][0] < 0) { // southern hem
-			return ((doty < this.dstStart) || (doty > this.dstEnd)) ? 1 : 0;
+			return ((date < this.dstStart) || (date > this.dstEnd)) ? 1 : 0;
 		} else {
-			return (doty > this.dstStart && doty < this.dstEnd) ? 1 : 0;  
+			return (date > this.dstStart && date < this.dstEnd) ? 1 : 0;  
 		}
 	}
 }
@@ -622,10 +612,9 @@ var AxesToDraw = {
 		
 		var offset = Location.dstOffset( NOW );
 
-		// we try to figure out what the correct local time is for the location we're displaying
-		var guessed_hours = box_hours( adjust_time_hack( NOW.getHourFloatOfTheDay() ) );
+		var localHoursN = Location.localTimeInHoursN();
 
-		var nowYPos = Math.floor( guessed_hours * Y_SCALE );
+		var nowYPos = Math.floor( localHoursN * Y_SCALE );
 
 		AxesToDraw.suns( nowYPos );
 		
@@ -637,7 +626,7 @@ var AxesToDraw = {
 		};
 
 		AxesToDraw.horizonPassedBars( boxed );
-		AxesToDraw.text(boxed, guessed_hours, nowYPos);
+		AxesToDraw.text(boxed, localHoursN, nowYPos);
 
 		$( $('#months div').get(NOW.getMonth()) ).addClass('ACTIVE');
 	},
