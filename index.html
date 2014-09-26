@@ -10,16 +10,6 @@
 
 		<!--[if IE]><script type="text/javascript" src="js/excanvas.js"></script><![endif]-->
 
-		<!-- 
-			fb / tw / etc
-			interactive overlay
-			iphone/ipad optimised version - tap to show stuff
-			
-			add cities from analytics - dubai, jerusalum etc
-			
-			option to use detected ll + infer summertime from country
-			fix coordinates
-		-->
 
 		<!-- // <script type="text/javascript" src="http://ip-geo.appspot.com/geo_data.js"></script> -->
 		
@@ -359,17 +349,13 @@ function CalculateSunriseOrSunset(latitude, longitude, date, sunrise, twilight)
 		else
 				zenith = 90.8333333333;
 
-
 		// Calculate the day of the year.
-
 		N1 = Math.floor(275.0 * month / 9.0);
 		N2 = Math.floor((month + 9.0) / 12.0);
 		N3 = 1.0 + Math.floor((year - 4.0 * Math.floor(year / 4.0) + 2.0) / 3.0);
 		N = N1 - (N2 * N3) + day - 30.0;
 
-
 		// Convert the longitude to hour value and calculate an approximate time.
-
 		lngHour = longitude / 15.0;
 
 		if (sunrise)
@@ -377,62 +363,43 @@ function CalculateSunriseOrSunset(latitude, longitude, date, sunrise, twilight)
 		else
 				t = N + ((18.0 - lngHour) / 24.0)
 
-
 		// Calculate the sun's mean anomaly.
-
 		M = (0.9856 * t) - 3.289;
 
-
 		// Calculate the sun's true longitude.
-
 		L = M + (1.916 * sinD(M)) + (0.020 * sinD(2 * M)) + 282.634;
 
 		while (L >= 360) L -= 360.0;
 		while (L <  0)   L += 360.0;
 
-
 		// Caculate the sun's right ascension.
-
 		RA = atanD(0.91764 * tanD(L));
 
 		while (RA >= 360) RA -= 360.0;
 		while (RA <  0)   RA += 360.0;
 
-
 		// Right ascension value needs to be in the same quadrant as L.
-
 		Lquadrant = Math.floor(L / 90.0) * 90.0;
 		RAquadrant = Math.floor(RA / 90.0) * 90.0;
 		RA = RA + (Lquadrant - RAquadrant);
 
-
 		// Right ascension value needs to be converted into hours.
-
 		RA /= 15.0;
 
-
 		// Calculate the sun's declination.
-
 		sinDec = 0.39782 * sinD(L);
 		cosDec = cosD(asinD(sinDec));
 
-
 		// Calculate the sun's local hour angle.
-
 		cosH = (cosD(zenith) - (sinDec * sinD(latitude))) / (cosDec * cosD(latitude));
 
-		if (sunrise)
-		{
-				if (cosH > 1) return null;
+		if (sunrise) {
+			if (cosH > 1) return null;
+		} else {
+			if (cosH < -1) return null;
 		}
-		else
-		{
-				if (cosH < -1) return null;
-		}
-
 
 		// Finish calculating H and convert into hours.
-
 		if (sunrise)
 				H = 360.0 - acosD(cosH);
 		else
@@ -440,14 +407,10 @@ function CalculateSunriseOrSunset(latitude, longitude, date, sunrise, twilight)
 
 		H /= 15.0
 
-
 		// Calculate local mean time of rising.
-
 		T = H + RA - (0.06571 * t) - 6.622;
 
-
 		// Adjust back to UTC.
-
 		// we want local time
 		UT = T; // - lngHour;
 
@@ -467,9 +430,8 @@ function box_hours (tmp) {
 }
 
 
-
-
 // 
+
 function adjust_time_hack(hours) {
 	var tmp = hours + DB[Location.name()][2];
 	return box_hours(tmp);
@@ -489,7 +451,9 @@ var X = 365,
 		ROUGH_TWILIGHT_LENGTH = 0;
 
 var DST_START, DST_END;
-	
+
+var cx;
+
 var ua = navigator.userAgent.toLowerCase();
 var TOUCH_INTERFACE = ((ua.indexOf('iphone')        != -1) ||
                        (ua.indexOf('ipod')          != -1) || 
@@ -536,18 +500,15 @@ function calc_summertime_offset (now) {
 
 
 $(window).ready(function () {
-
 	if (TOUCH_INTERFACE) {
 		$('body').addClass('TOUCH');
 	}
-	
+
+	var tmpString = '';
 	$.each(DB, function(city, ll) {
-		if (ll) {
-			$('#cities').append("<span>" + city + "</span> ");
-		} else {
-			$('#cities').append('<hr><h2>' + city + '</h2>');
-		}
+			tmpString += ll ? "<span>" + city + "</span> " : '<hr><h2>' + city + '</h2>';
 	});
+	$('#cities').append( tmpString );
 
 	$('#cities span').click(function() {
 		var city = $(this).text();
@@ -561,6 +522,9 @@ $(window).ready(function () {
 		$('#cities').toggle();
 	});
 
+	var example = document.getElementById('example');
+	cx = example.getContext('2d');
+
 	if (TOUCH_INTERFACE) {
 		window.scrollTo(0, 1);
 	}
@@ -570,11 +534,6 @@ $(window).ready(function () {
 
 
 
-var Canvas = {
-	clear: function() {}
-}
-
-var cx;
 
 function refresh() {
 	if (DB[Location.name()][3]) {
@@ -584,16 +543,14 @@ function refresh() {
 		DST_END = null;
 		DST_START = null;
 	}
-	
+
 	var tmp = new Date();
 	NOW = new Date( Date.now() + tmp.getTimezoneOffset() * 60 * 1000 );
 	current_day = JAN_FIRST.getTime(),
 	
 	$('h1 span#location').html( Location.name() );
 	
-	var example = document.getElementById('example');
-	cx = example.getContext('2d');
-	cx.clearRect (0, 0, 1000, 1000);
+	cx.clearRect(0, 0, 1000, 1000);
 
 	cx.fillStyle = '#000014';
 	cx.fillRect(0, 0, 365, 480);
