@@ -501,7 +501,7 @@
           current_day = JAN_FIRST.getTime(),
           LONG = DB[LOCATION][0],
           LAT = DB[LOCATION][1],
-          NOW = new Date(),
+          NOW = (new Date()),
           ROUGH_TWILIGHT_LENGTH = 0;
 
       var DST_START, DST_END;
@@ -768,7 +768,9 @@
 
         // 
         $('#months span#date').text(NOW.getDate()).css({ left: NOW.getMonth() * 30 + 3 });
-        $('#times span').text(n_to_hhmm(guessed_hours)).css({ top: now_minutes_pos - 4, left: NOW.getMonth() * 30 + 70 });
+        var currentTimeMarginLeft = NOW.getMonth() * 30;
+        currentTimeMarginLeft += NOW.getMonth() < 9 ? 92 : 24;
+        $('#times span').text(n_to_hhmm(guessed_hours)).css({ top: now_minutes_pos - 4, left: currentTimeMarginLeft });
 
         // if ()
         // DESCRIPTION[]
