@@ -1,5 +1,6 @@
-<html manifest="/cache.manifest"> 
-<!-- <html>  -->
+
+<html> 
+<!-- <html manifest="/cache.manifest">  -->
   <head> 
     <title>When Comes the Sun</title> 
 
@@ -581,6 +582,9 @@
         var cx = example.getContext('2d');
         cx.clearRect (0, 0, 1000, 1000);
 
+        cx.fillStyle = '#000028';
+        cx.fillRect(0, 0, 365, 480);
+
         var previous_state = 'night'; // twilight | day
       
         for (var x=0; x < X; x++) {
@@ -823,7 +827,7 @@
       body {
 /*        font-family: Geneva;*/
         font-family: Georgia;
-        background: #000028;
+        background: #000014;
 /*        padding: 24px 48px;*/
         height: 100%;
       }
@@ -930,7 +934,7 @@
       }
       
       canvas {
-        background: #000028;
+        /*background: #000028;*/
       }
       
       
