@@ -423,8 +423,9 @@ function box_hours (tmp) {
 }
 
 
-// 
 
+
+// 
 function adjust_time_hack(hours) {
 	var tmp = hours + DB[Location.name()][2];
 	return box_hours(tmp);
@@ -501,6 +502,10 @@ $(window).ready(function () {
 function refresh() {
 	NOW = new Date();
 	var ll = Location.ll();
+
+	// work out where we our local timezone is
+	// var tmp = new Date();
+	// NOW = new Date( Date.now() + tmp.getTimezoneOffset() * 60 * 1000 ); // HACK
 
 	cx.clearRect(0, 0, 1000, 1000);
 
@@ -623,11 +628,16 @@ var AxesToDraw = {
 		var ll = Location.ll();
 		AxesToDraw.todayLine();
 		AxesToDraw.timeGrid();
-
+		
 		var offset = Location.dstOffset( NOW );
-		var nowYPos = Math.floor(NOW.getHourFloatOfTheDay() * Y_SCALE);
 
-		AxesToDraw.suns(nowYPos);
+
+		// we try to figure out what the correct local time is for the location we're displaying
+		var guessed_hours = box_hours( adjust_time_hack( NOW.getHourFloatOfTheDay() ) + offset );
+
+		var nowYPos = Math.floor( guessed_hours * Y_SCALE);
+
+		AxesToDraw.suns( nowYPos );
 		
 		var boxed = {
 			sunrise : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, true) + offset),
@@ -637,7 +647,7 @@ var AxesToDraw = {
 		};
 
 		AxesToDraw.horizonPassedBars( boxed );
-		AxesToDraw.text(boxed, NOW.getHourFloatOfTheDay(), nowYPos);
+		AxesToDraw.text(boxed, guessed_hours, nowYPos);
 
 		$( $('#months div').get(NOW.getMonth()) ).addClass('ACTIVE');
 	},
