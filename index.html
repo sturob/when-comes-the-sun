@@ -452,9 +452,6 @@ function CalculateSunriseOrSunset(latitude, longitude, date, sunrise, twilight)
 		UT = T; // - lngHour;
 
 		// UT += Math.ceil(longitude / 15);
-		
-		// UT -= DB[LOCATION][2];
-
 
 		// while (UT >= 24) UT -= 24.0;
 		// while (UT <  0)  UT += 24.0;
@@ -462,33 +459,25 @@ function CalculateSunriseOrSunset(latitude, longitude, date, sunrise, twilight)
 		return box_hours(UT);
 }
 
+
+function box_hours (tmp) {
+	while (tmp >= 24) tmp -= 24.0;
+	while (tmp <  0)  tmp += 24.0;
+	return tmp;
+}
+
+
+
+
 // 
 function adjust_time_hack(hours) {
-	var tmp = hours + DB[LOCATION][2];
-	
+	var tmp = hours + DB[Location.name()][2];
 	return box_hours(tmp);
 }
 
-function box_hours (tmp) {
-	 while (tmp >= 24) tmp -= 24.0;
-		while (tmp <  0)  tmp += 24.0;
-		return tmp;
-}
-
-var loc_string = 'London, United Kingdom';
-
-if (false && geo) {
-	loc_string = geo.ll[2].city + ', ' + geo.ll[2].country;
-	if (! DB[loc_string] ) {
-		loc_string = false;
-	}
-}
-
-
 var currentYear = (new Date()).getFullYear();
 
-var LOCATION = $.cookie('CITY') || loc_string,
-		X = 365,
+var X = 365,
 		Y = 24,
 		X_SCALE = 1,
 		Y_SCALE = 20,
@@ -496,8 +485,6 @@ var LOCATION = $.cookie('CITY') || loc_string,
 		HOUR_IN_MS = 60 * 60 * 1000;
 		DAY_IN_MS = HOUR_IN_MS * 24,
 		current_day = JAN_FIRST.getTime(),
-		LONG = DB[LOCATION][0],
-		LAT = DB[LOCATION][1],
 		NOW = (new Date()),
 		ROUGH_TWILIGHT_LENGTH = 0;
 
@@ -505,20 +492,42 @@ var DST_START, DST_END;
 	
 var ua = navigator.userAgent.toLowerCase();
 var TOUCH_INTERFACE = ((ua.indexOf('iphone')        != -1) ||
-											 (ua.indexOf('ipod')          != -1) || 
-											 (ua.indexOf('ipad')          != -1) ||
-											 (ua.indexOf('android')       != -1) ||
-											 (ua.indexOf('webos')         != -1) ||
-											 (ua.indexOf('windows phone') != -1)
-											);
+                       (ua.indexOf('ipod')          != -1) || 
+                       (ua.indexOf('ipad')          != -1) ||
+                       (ua.indexOf('android')       != -1) ||
+                       (ua.indexOf('webos')         != -1) ||
+                       (ua.indexOf('windows phone') != -1)
+                      );
 
 
+var Location = { // DB[] -> "Teheran, Iran": [  35.45,   51.45,  IRT,  2 ]
+	set: function(city) {
+		Location.current = city;
+	},
+	name: function () {
+		return this.current
+	},
+	lat: function() {
+		return DB[ this.current ][1]
+	},
+	long: function() {
+		return DB[ this.current ][0]
+	},
+	ll: function () {
+		return {
+			long: this.long(),
+			lat:  this.lat()
+		}
+	}
+}
+
+Location.set( $.cookie('CITY') || 'London, United Kingdom' );
 
 
 function calc_summertime_offset (now) {
-	if (! DB[LOCATION][3]) return 0; // no summertime
+	if (! DB[Location.name()][3]) return 0; // no summertime
 	
-	if (DB[LOCATION][0] < 0) { // southern hem
+	if (DB[Location.name()][0] < 0) { // southern hem
 		return ((now < DST_START) || (now > DST_END)) ? 1 : 0;
 	} else {
 		return (now > DST_START && now < DST_END) ? 1 : 0;  
@@ -527,7 +536,7 @@ function calc_summertime_offset (now) {
 
 
 $(window).ready(function () {
-	
+
 	if (TOUCH_INTERFACE) {
 		$('body').addClass('TOUCH');
 	}
@@ -543,9 +552,7 @@ $(window).ready(function () {
 	$('#cities span').click(function() {
 		var city = $(this).text();
 		$.cookie('CITY', city);
-		LOCATION = city;
-		LONG = DB[city][0];
-		LAT = DB[city][1];
+		Location.set( city )
 		$('#cities').fadeOut();
 		refresh();
 	});
@@ -570,9 +577,9 @@ var Canvas = {
 var cx;
 
 function refresh() {
-	if (DB[LOCATION][3]) {
-		DST_START = new Date ( SUNTIME[ DB[LOCATION][3] ][0] + " " + currentYear );
-		DST_END = new Date ( SUNTIME[ DB[LOCATION][3] ][1] + " " + currentYear );
+	if (DB[Location.name()][3]) {
+		DST_START = new Date ( SUNTIME[ DB[Location.name()][3] ][0] + " " + currentYear );
+		DST_END = new Date ( SUNTIME[ DB[Location.name()][3] ][1] + " " + currentYear );
 	} else {
 		DST_END = null;
 		DST_START = null;
@@ -582,7 +589,7 @@ function refresh() {
 	NOW = new Date( Date.now() + tmp.getTimezoneOffset() * 60 * 1000 );
 	current_day = JAN_FIRST.getTime(),
 	
-	$('h1 span#location').html( LOCATION );
+	$('h1 span#location').html( Location.name() );
 	
 	var example = document.getElementById('example');
 	cx = example.getContext('2d');
@@ -591,16 +598,18 @@ function refresh() {
 	cx.fillStyle = '#000014';
 	cx.fillRect(0, 0, 365, 480);
 
+	var ll = Location.ll();
+
 	// every day in the year
 	for (var x=0; x < X; x++) {
 		// var day = new Day( x );
 		// day.draw();
 		var current_date = new Date(current_day);
 		var timeOf = {
-			dawn:    CalculateSunriseOrSunset(LONG, LAT, current_date, true, true),
-			dusk:    CalculateSunriseOrSunset(LONG, LAT, current_date, false, true),
-			sunrise: CalculateSunriseOrSunset(LONG, LAT, current_date, true),
-			sunset:  CalculateSunriseOrSunset(LONG, LAT, current_date, false)
+			dawn:    CalculateSunriseOrSunset(ll.long, ll.lat, current_date, true, true),
+			dusk:    CalculateSunriseOrSunset(ll.long, ll.lat, current_date, false, true),
+			sunrise: CalculateSunriseOrSunset(ll.long, ll.lat, current_date, true),
+			sunset:  CalculateSunriseOrSunset(ll.long, ll.lat, current_date, false)
 		};
 		var offset = calc_summertime_offset(current_date);
 		timeOf.sunrise += offset;
@@ -609,7 +618,7 @@ function refresh() {
 		timeOf.dawn += offset;
 
 		Day.setX(x);
-		if (LONG < 58) {
+		if (ll.long < 58) {
 			Day.drawDawn(timeOf);
 			Day.drawDusk(timeOf);
 		}
@@ -628,10 +637,10 @@ function refresh() {
 	AxesToDraw.suns(now_minutes_pos);
 	
 	var boxed = {
-		sunrise : box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, true) + summertime_offset),
-		sunset  : box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, false) + summertime_offset),
-		dawn    : box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, true, true) + summertime_offset),
-		dusk    : box_hours(CalculateSunriseOrSunset(LONG, LAT, NOW, false, true) + summertime_offset)
+		sunrise : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, true) + summertime_offset),
+		sunset  : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, false) + summertime_offset),
+		dawn    : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, true, true) + summertime_offset),
+		dusk    : box_hours(CalculateSunriseOrSunset(ll.long, ll.lat, NOW, false, true) + summertime_offset)
 	};
 
 	AxesToDraw.horizonPassedBars(boxed);
