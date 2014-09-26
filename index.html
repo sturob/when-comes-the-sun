@@ -474,7 +474,16 @@ $(window).ready(function () {
 	}
 
 	refresh();
-	setInterval(refresh, 20000);
+
+	var wait = (60 - NOW.getSeconds()) * 1000;
+	
+	setTimeout(
+		function() {
+			refresh();
+			// console.log('refreshing every ' + 60 * 1000)
+			setInterval(refresh, 60 * 1000)
+		}, wait
+	); // refresh on the next minute
 });
 
 
