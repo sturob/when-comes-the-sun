@@ -563,26 +563,12 @@
 
         setInterval(refresh, 20000);
       });
-      
-
-      
-
-      // function Day (date) {
-
-      // }
-
-      // Day.prototype.
-
-      // var {
-
-      // }
 
 
 
       var cx;
 
       function refresh() {
-        // $('#example').height(Y * Y_SCALE).width(X * X_SCALE);
         if (DB[LOCATION][3]) {
           DST_START = new Date ( SUNTIME[ DB[LOCATION][3] ][0] + " " + currentYear );
           DST_END = new Date ( SUNTIME[ DB[LOCATION][3] ][1] + " " + currentYear );
@@ -595,7 +581,7 @@
         NOW = new Date( Date.now() + tmp.getTimezoneOffset() * 60 * 1000 );
         current_day = JAN_FIRST.getTime(),
         
-        $('h1 span#location').html(LOCATION);
+        $('h1 span#location').html( LOCATION );
         
         var example = document.getElementById('example');
         cx = example.getContext('2d');
@@ -603,8 +589,6 @@
 
         cx.fillStyle = '#000014';
         cx.fillRect(0, 0, 365, 480);
-
-        var previous_state = 'night'; // twilight | day
       
         // every day in the year
         for (var x=0; x < X; x++) {
@@ -617,123 +601,23 @@
             sunset:  CalculateSunriseOrSunset(LONG, LAT, current_date, false)
           };
           
-          if (timeOf.sunset !== null) { // return NaN for solid days :)
-            previous_state = 'night'
-          } else {
-            timeOf.sunset = 24;
-            previous_state = 'day';
-
-            if (timeOf.dusk !== null) {
-              previous_state = 'twilight';
-            }
-          }
-          
           var offset = calc_summertime_offset(current_date);
           timeOf.sunrise += offset;
           timeOf.sunset += offset;
           timeOf.dusk += offset;
           timeOf.dawn += offset;
           
-          cx.fillStyle = "rgb(240,240,255)";
+          cx.fillStyle = "rgb(240, 240, 255)";
 
-          function draw_day () {
-            // main daylight
-            if (timeOf.sunrise) {
-              cx.fillRect(x * X_SCALE, timeOf.sunrise * Y_SCALE, X_SCALE, (timeOf.sunset - timeOf.sunrise) * Y_SCALE);
-            } else {
-              if (previous_state == 'day') {
-                cx.fillRect(x * X_SCALE, 0, X_SCALE, Y * Y_SCALE);
-              }
-              // previous_state bug code here
-            }
-          }
-          
-          function draw_dawn () {          // dawn twilight
-            if (timeOf.sunrise && timeOf.dawn) {
-              var dawn_length = (timeOf.sunrise - timeOf.dawn) * Y_SCALE,
-                  dawn_pos = timeOf.dawn * Y_SCALE,          
-                  ROUGH_TWILIGHT_LENGTH = dawn_length;
-    
-              var dawngrad = cx.createLinearGradient(0, dawn_pos, 0, dawn_length + dawn_pos);  
-                  dawngrad.addColorStop(0, '#000028');  
-                  dawngrad.addColorStop(1.0, 'rgb(240,240,255)');  
-
-              cx.fillStyle = dawngrad;
-              cx.fillRect(x * X_SCALE, dawn_pos, X_SCALE, dawn_length + 1);
-            } else {
-              
-            }
-            // console.log(timeOf)
-          }
-          
-          function draw_dusk (cx) {
-            // dusk twilight
-            if (timeOf.sunset && timeOf.dusk) {
-              var dusk_length = (timeOf.dusk - timeOf.sunset) * Y_SCALE,
-                  dusk_pos = timeOf.dusk * Y_SCALE;
-          
-              var duskgrad = cx.createLinearGradient(0, timeOf.sunset * Y_SCALE, 0, dusk_pos);  
-                  duskgrad.addColorStop(1, '#000028');  
-                  duskgrad.addColorStop(0, 'rgb(240,240,255)');  
-
-              cx.fillStyle = duskgrad;
-              cx.fillRect(x * X_SCALE, (timeOf.sunset * Y_SCALE) - 1, X_SCALE, dusk_length);
-            }
-          }
-          
-          function draw_permidarkness (cx) {
-            // winter permi-darkness
-            if (timeOf.dawn && timeOf.dusk && ! timeOf.sunset && ! timeOf.sunrise) {
-              var dawn_pos = timeOf.dawn * Y_SCALE,
-                  dusk_pos = timeOf.dusk * Y_SCALE;
-
-              var grad = cx.createLinearGradient(0, dawn_pos, 0, dusk_pos);  
-                  grad.addColorStop(0, '#000028');  
-                  grad.addColorStop(0.3, 'rgb(100,100,110)');  
-                  grad.addColorStop(0.7, 'rgb(100,100,110)');  
-                  grad.addColorStop(1, '#000028');
-
-              cx.fillStyle = grad;
-              cx.fillRect(x * X_SCALE, dawn_pos, X_SCALE, dusk_pos);
-            }
-          }
-          
-          function draw_permitwilight(cx){
-            // summer night twilight
-            if ((timeOf.sunrise || timeOf.sunset) && ! timeOf.dusk && ! timeOf.dawn) {
-              if (timeOf.sunrise) {
-                var dawn_length = timeOf.sunrise * Y_SCALE;
-
-                var grad = cx.createLinearGradient(0, 0, 0, dawn_length);
-                    grad.addColorStop(0, '#000028');  
-                    grad.addColorStop(1.0, 'rgb(240,240,255)');  
-
-                cx.fillStyle = grad;
-                cx.fillRect(x * X_SCALE, 0, X_SCALE, dawn_length + 1);
-              }
-              if (timeOf.sunset) {
-                var dusk_pos = timeOf.sunset * Y_SCALE;
-
-                var grad = cx.createLinearGradient(0, dusk_pos, 0,  Y);  
-                    grad.addColorStop(1.0, '#000028');  
-                    grad.addColorStop(0, 'rgb(240,240,255)');  
-
-                cx.fillStyle = grad;
-                cx.fillRect(x * X_SCALE, dusk_pos - 1, X_SCALE, Y);
-              }
-            }
-          }
-          
-
+          Day.setX(x);
           if (LONG < 58) {
-            draw_dawn( cx );
-            draw_dusk( cx );
+            Day.drawDawn(timeOf);
+            Day.drawDusk(timeOf);
           }
-          draw_day();
+          Day.drawFullLight(timeOf);
+
           current_day += DAY_IN_MS;
-        } // end days draw
-
-
+        }
 
         AxesToDraw.todayLine();
         AxesToDraw.timeGrid();
@@ -755,10 +639,51 @@
         AxesToDraw.text(boxed, guessed_hours, now_minutes_pos);
 
         $( $('#months div').get(NOW.getMonth()) ).addClass('ACTIVE');
+      } // end refresh
+
+
+
+
+      var Day = {
+        setX: function(x) { this.x = x },
+        drawFullLight: function(timeOf) {
+          // main daylight
+          if (timeOf.sunrise) {
+            cx.fillRect(this.x * X_SCALE, timeOf.sunrise * Y_SCALE, X_SCALE, (timeOf.sunset - timeOf.sunrise) * Y_SCALE);
+          } else {
+          }
+        },
+        drawDawn: function(timeOf) { // dawn twilight
+          if (timeOf.sunrise && timeOf.dawn) {
+            var dawn_length = (timeOf.sunrise - timeOf.dawn) * Y_SCALE,
+                dawn_pos = timeOf.dawn * Y_SCALE,          
+                ROUGH_TWILIGHT_LENGTH = dawn_length;
+      
+            var dawngrad = cx.createLinearGradient(0, dawn_pos, 0, dawn_length + dawn_pos);  
+                dawngrad.addColorStop(0, '#000028');  
+                dawngrad.addColorStop(1.0, 'rgb(240,240,255)');  
+
+            cx.fillStyle = dawngrad;
+            cx.fillRect(this.x * X_SCALE, dawn_pos, X_SCALE, dawn_length + 1);
+          } else {
+            // ?
+          }
+        },
+        drawDusk: function(timeOf) {
+          // dusk twilight
+          if (timeOf.sunset && timeOf.dusk) {
+            var dusk_length = (timeOf.dusk - timeOf.sunset) * Y_SCALE,
+                dusk_pos = timeOf.dusk * Y_SCALE;
+        
+            var duskgrad = cx.createLinearGradient(0, timeOf.sunset * Y_SCALE, 0, dusk_pos);  
+                duskgrad.addColorStop(1, '#000028');  
+                duskgrad.addColorStop(0, 'rgb(240,240,255)');  
+
+            cx.fillStyle = duskgrad;
+            cx.fillRect(this.x * X_SCALE, (timeOf.sunset * Y_SCALE) - 1, X_SCALE, dusk_length);
+          }
+        }
       }
-
-
-
 
       var AxesToDraw = {
         todayLine: function() {
